@@ -1,0 +1,542 @@
+// server.js - Express Backend for FSRS Web UI with Multi-deck & Theme support
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+const Database = require('better-sqlite3');
+
+const app = express();
+const PORT = process.env.PORT || 3001;
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Database setup - connect to existing cards.db
+const DB_PATH = process.env.DB_PATH || path.join(__dirname, '..', 'data', 'cards.db');
+const db = new Database(DB_PATH);
+
+// Import FSRS engine
+const FSRSEngine = require('../src/fsrs');
+
+// ==================== Database Helper Functions ====================
+
+// Fix inconsistent state values in database
+function fixCardStates() {
+  try {
+    // Fix "2.0" state to "review" (this was a bug where State.Review = 2 was stored as string)
+    const result = db.prepare("UPDATE cards SET state = 'review' WHERE state = '2.0'").run();
+    if (result.changes > 0) {
+      console.log(`Fixed ${result.changes} cards with invalid state '2.0'`);
+    }
+    
+    // Fix empty or null states to "new"
+    db.prepare("UPDATE cards SET state = 'new' WHERE state IS NULL OR state = ''").run();
+  } catch (error) {
+    console.error('Error fixing card states:', error);
+  }
+}
+
+// Run state fix on startup
+fixCardStates();
+
+// Get current local time for database queries
+function getLocalNow() {
+  return new Date().toISOString();
+}
+
+// ==================== Settings API ====================
+
+// Get theme
+app.get('/api/settings/theme', (req, res) => {
+  try {
+    const theme = db.prepare("SELECT value FROM settings WHERE key = 'theme'").get();
+    res.json({ success: true, data: theme ? theme.value : 'light' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Set theme
+app.post('/api/settings/theme', (req, res) => {
+  try {
+    const { theme } = req.body;
+    if (!theme || !['light', 'dark'].includes(theme)) {
+      return res.status(400).json({ success: false, error: 'Invalid theme' });
+    }
+    db.prepare(`
+      INSERT INTO settings (key, value) VALUES ('theme', ?)
+      ON CONFLICT(key) DO UPDATE SET value = excluded.value
+    `).run(theme);
+    res.json({ success: true, data: theme });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ==================== Deck API ====================
+
+// Get all decks
+app.get('/api/decks', (req, res) => {
+  try {
+    // Use localtime for due_date comparison to match user timezone
+    const decks = db.prepare(`
+      SELECT d.*, 
+        (SELECT COUNT(*) FROM cards WHERE deck_id = d.id) as card_count,
+        (SELECT COUNT(*) FROM cards WHERE deck_id = d.id AND strftime('%s', due_date) <= strftime('%s', 'now')) as due_count
+      FROM decks d 
+      ORDER BY d.id ASC
+    `).all();
+    res.json({ success: true, data: decks });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get single deck
+app.get('/api/decks/:id', (req, res) => {
+  try {
+    const deck = db.prepare('SELECT * FROM decks WHERE id = ?').get(req.params.id);
+    if (!deck) {
+      return res.status(404).json({ success: false, error: 'Deck not found' });
+    }
+    res.json({ success: true, data: deck });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Create deck
+app.post('/api/decks', (req, res) => {
+  try {
+    const { name, description } = req.body;
+    if (!name) {
+      return res.status(400).json({ success: false, error: 'Deck name required' });
+    }
+    
+    const stmt = db.prepare('INSERT INTO decks (name, description) VALUES (?, ?)');
+    const result = stmt.run(name, description || '');
+    
+    const newDeck = db.prepare('SELECT * FROM decks WHERE id = ?').get(result.lastInsertRowid);
+    res.json({ success: true, data: newDeck });
+  } catch (error) {
+    if (error.message.includes('UNIQUE')) {
+      return res.status(400).json({ success: false, error: 'Deck name already exists' });
+    }
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Update deck
+app.put('/api/decks/:id', (req, res) => {
+  try {
+    const { name, description } = req.body;
+    const deckId = parseInt(req.params.id);
+    
+    if (deckId === 1) {
+      return res.status(400).json({ success: false, error: 'Cannot modify default deck' });
+    }
+    
+    db.prepare(`
+      UPDATE decks SET name = ?, description = ?, updated_at = datetime('now') WHERE id = ?
+    `).run(name, description || '', deckId);
+    
+    const updatedDeck = db.prepare('SELECT * FROM decks WHERE id = ?').get(deckId);
+    res.json({ success: true, data: updatedDeck });
+  } catch (error) {
+    if (error.message.includes('UNIQUE')) {
+      return res.status(400).json({ success: false, error: 'Deck name already exists' });
+    }
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Delete deck
+app.delete('/api/decks/:id', (req, res) => {
+  try {
+    const deckId = parseInt(req.params.id);
+    
+    if (deckId === 1) {
+      return res.status(400).json({ success: false, error: 'Cannot delete default deck' });
+    }
+    
+    // Move cards to default deck before deleting
+    db.prepare('UPDATE cards SET deck_id = 1 WHERE deck_id = ?').run(deckId);
+    db.prepare('DELETE FROM decks WHERE id = ?').run(deckId);
+    
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ==================== Card API ====================
+
+// Get all cards (with optional deck filter)
+app.get('/api/cards', (req, res) => {
+  try {
+    const deckId = req.query.deck ? parseInt(req.query.deck) : null;
+    let cards;
+    if (deckId) {
+      cards = db.prepare('SELECT * FROM cards WHERE deck_id = ? ORDER BY created_at DESC').all(deckId);
+    } else {
+      cards = db.prepare('SELECT * FROM cards ORDER BY created_at DESC').all();
+    }
+    res.json({ success: true, data: cards });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get due cards (with optional deck filter)
+app.get('/api/cards/due', (req, res) => {
+  try {
+    const deckId = req.query.deck ? parseInt(req.query.deck) : null;
+    // Use localtime for consistency with deck stats
+    const now = new Date();
+    let cards;
+    if (deckId) {
+      cards = db.prepare(`
+        SELECT * FROM cards 
+        WHERE deck_id = ? AND strftime('%s', due_date) <= strftime('%s', 'now')
+        ORDER BY due_date ASC
+      `).all(deckId);
+    } else {
+      cards = db.prepare(`
+        SELECT * FROM cards 
+        WHERE strftime('%s', due_date) <= strftime('%s', 'now')
+        ORDER BY due_date ASC
+      `).all();
+    }
+    res.json({ success: true, data: cards });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get single card
+app.get('/api/cards/:id', (req, res) => {
+  try {
+    const card = db.prepare('SELECT * FROM cards WHERE id = ?').get(req.params.id);
+    if (!card) {
+      return res.status(404).json({ success: false, error: 'Card not found' });
+    }
+    res.json({ success: true, data: card });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Add new card (with optional deck)
+app.post('/api/cards', (req, res) => {
+  try {
+    const { question, answer, deck_id } = req.body;
+    if (!question || !answer) {
+      return res.status(400).json({ success: false, error: 'Question and answer required' });
+    }
+    
+    const deckId = deck_id ? parseInt(deck_id) : 1;
+    const now = new Date();
+    const stmt = db.prepare(`
+      INSERT INTO cards (deck_id, question, answer, due_date, created_at, state)
+      VALUES (?, ?, ?, ?, ?, 'new')
+    `);
+    const result = stmt.run(deckId, question, answer, now.toISOString(), now.toISOString());
+    
+    const newCard = db.prepare('SELECT * FROM cards WHERE id = ?').get(result.lastInsertRowid);
+    res.json({ success: true, data: newCard });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Move card to different deck
+app.put('/api/cards/:id/deck', (req, res) => {
+  try {
+    const { deck_id } = req.body;
+    db.prepare('UPDATE cards SET deck_id = ? WHERE id = ?').run(deck_id, req.params.id);
+    const updatedCard = db.prepare('SELECT * FROM cards WHERE id = ?').get(req.params.id);
+    res.json({ success: true, data: updatedCard });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Update card (after review)
+app.put('/api/cards/:id', (req, res) => {
+  try {
+    const { due_date, interval, ease_factor, repetitions, lapses, state, last_review } = req.body;
+    const stmt = db.prepare(`
+      UPDATE cards SET
+        due_date = ?,
+        interval = ?,
+        ease_factor = ?,
+        repetitions = ?,
+        lapses = ?,
+        state = ?,
+        last_review = ?
+      WHERE id = ?
+    `);
+    stmt.run(due_date, interval, ease_factor, repetitions, lapses, state, last_review, req.params.id);
+    
+    const updatedCard = db.prepare('SELECT * FROM cards WHERE id = ?').get(req.params.id);
+    res.json({ success: true, data: updatedCard });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Delete card
+app.delete('/api/cards/:id', (req, res) => {
+  try {
+    db.prepare('DELETE FROM cards WHERE id = ?').run(req.params.id);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ==================== Statistics API ====================
+
+// Get statistics (with optional deck filter)
+app.get('/api/stats', (req, res) => {
+  try {
+    const deckId = req.query.deck ? parseInt(req.query.deck) : null;
+    
+    let total, due, reviewed, newCards, learning, avgEase;
+    
+    if (deckId) {
+      total = db.prepare('SELECT COUNT(*) as count FROM cards WHERE deck_id = ?').get(deckId).count;
+      due = db.prepare("SELECT COUNT(*) as count FROM cards WHERE deck_id = ? AND strftime('%s', due_date) <= strftime('%s', 'now')").get(deckId).count;
+      reviewed = db.prepare('SELECT COUNT(*) as count FROM cards WHERE deck_id = ? AND repetitions > 0').get(deckId).count;
+      // Fixed: Added parentheses around OR condition and handle both 'new' state and repetitions = 0
+      newCards = db.prepare("SELECT COUNT(*) as count FROM cards WHERE deck_id = ? AND (state = 'new' OR repetitions = 0)").get(deckId).count;
+      learning = db.prepare("SELECT COUNT(*) as count FROM cards WHERE deck_id = ? AND (state = 'learning' OR state = 'relearning')").get(deckId).count;
+      avgEase = db.prepare('SELECT AVG(ease_factor) as avg FROM cards WHERE deck_id = ? AND repetitions > 0').get(deckId).avg || 2.5;
+    } else {
+      total = db.prepare('SELECT COUNT(*) as count FROM cards').get().count;
+      due = db.prepare("SELECT COUNT(*) as count FROM cards WHERE strftime('%s', due_date) <= strftime('%s', 'now')").get().count;
+      reviewed = db.prepare('SELECT COUNT(*) as count FROM cards WHERE repetitions > 0').get().count;
+      // Fixed: Added parentheses around OR condition
+      newCards = db.prepare("SELECT COUNT(*) as count FROM cards WHERE state = 'new' OR repetitions = 0").get().count;
+      learning = db.prepare("SELECT COUNT(*) as count FROM cards WHERE state = 'learning' OR state = 'relearning'").get().count;
+      avgEase = db.prepare('SELECT AVG(ease_factor) as avg FROM cards WHERE repetitions > 0').get().avg || 2.5;
+    }
+    
+    res.json({
+      success: true,
+      data: {
+        total,
+        due,
+        reviewed,
+        new: newCards,
+        learning,
+        avgEase: Math.round(avgEase * 100) / 100
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ==================== Review API ====================
+
+// Preview intervals before rating
+app.get('/api/review/:id/preview', (req, res) => {
+  try {
+    const card = db.prepare('SELECT * FROM cards WHERE id = ?').get(req.params.id);
+    if (!card) {
+      return res.status(404).json({ success: false, error: 'Card not found' });
+    }
+    
+    const previews = {};
+    for (let rating = 1; rating <= 5; rating++) {
+      const result = FSRSEngine.previewIntervals(card, rating);
+      if (result) {
+        previews[rating] = formatInterval(result.interval);
+      }
+    }
+    
+    res.json({ success: true, data: previews });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Review card with FSRS rating
+app.post('/api/review/:id', (req, res) => {
+  try {
+    const { rating } = req.body;
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ success: false, error: 'Rating must be 1-5' });
+    }
+    
+    const card = db.prepare('SELECT * FROM cards WHERE id = ?').get(req.params.id);
+    if (!card) {
+      return res.status(404).json({ success: false, error: 'Card not found' });
+    }
+    
+    // Use FSRS engine for scheduling
+    const fsrsCard = FSRSEngine.dbToCard(card);
+    const result = FSRSEngine.repeat(fsrsCard, rating);
+    
+    if (!result) {
+      return res.status(500).json({ success: false, error: 'Failed to calculate FSRS' });
+    }
+    
+    // Update card
+    const now = new Date();
+    db.prepare(`
+      UPDATE cards SET
+        due_date = ?,
+        interval = ?,
+        ease_factor = ?,
+        repetitions = ?,
+        lapses = ?,
+        state = ?,
+        last_review = ?
+      WHERE id = ?
+    `).run(
+      result.due_date,
+      result.interval,
+      result.ease_factor,
+      result.repetitions,
+      result.lapses,
+      result.state,
+      now.toISOString(),
+      req.params.id
+    );
+    
+    const updatedCard = db.prepare('SELECT * FROM cards WHERE id = ?').get(req.params.id);
+    res.json({ 
+      success: true, 
+      data: updatedCard, 
+      nextInterval: formatInterval(result.interval)
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Helper function to format interval - properly handles minutes
+function formatInterval(days) {
+  if (days < 1) {
+    // Convert to minutes (days * 24 * 60)
+    const minutes = Math.round(days * 24 * 60);
+    if (minutes < 60) {
+      return `${minutes}m`;
+    } else {
+      // If more than 60 minutes, show hours
+      return `${Math.round(minutes / 60)}h`;
+    }
+  } else if (days < 30) {
+    return `${Math.round(days)}d`;
+  } else if (days < 365) {
+    return `${Math.round(days / 30)}mo`;
+  } else {
+    return `${Math.round(days / 365)}y`;
+  }
+}
+
+
+// ==================== APKG Import API ====================
+
+const multer = require('multer');
+const APKGImporter = require('../src/apkg-import');
+const fs = require('fs');
+
+// Setup multer for file uploads
+const UPLOAD_DIR = path.join(__dirname, 'uploads');
+if (!fs.existsSync(UPLOAD_DIR)) {
+  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, UPLOAD_DIR);
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + '-' + file.originalname);
+  }
+});
+
+const upload = multer({ 
+  storage,
+  fileFilter: (req, file, cb) => {
+    if (file.originalname.endsWith('.apkg')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only .apkg files are allowed'));
+    }
+  },
+  limits: {
+    fileSize: 50 * 1024 * 1024 // 50MB limit
+  }
+});
+
+// Preview APKG file
+app.post('/api/apkg/preview', upload.single('apkg'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'No file uploaded' });
+    }
+
+    const importer = new APKGImporter(db);
+    const preview = await importer.preview(req.file.path);
+
+    // Cleanup uploaded file
+    fs.unlinkSync(req.file.path);
+
+    if (!preview.success) {
+      return res.status(400).json(preview);
+    }
+
+    res.json(preview);
+  } catch (error) {
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Import APKG file
+app.post('/api/apkg/import', upload.single('apkg'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'No file uploaded' });
+    }
+
+    const { deckId } = req.body;
+    const targetDeckId = deckId ? parseInt(deckId) : 1;
+
+    const importer = new APKGImporter(db);
+    const result = await importer.import(req.file.path, targetDeckId);
+
+    // Cleanup uploaded file
+    fs.unlinkSync(req.file.path);
+
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+
+    res.json(result);
+  } catch (error) {
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Serve SPA for all other routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`FSRS Web UI server running on http://localhost:${PORT}`);
+});
+
+module.exports = app;

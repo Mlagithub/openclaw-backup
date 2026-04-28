@@ -1,0 +1,74 @@
+{
+  "project": "pixel-art-editor",
+  "goal": "Build a collaborative pixel art editor with CRDTs - based on Jake Lazaroff's tutorial series",
+  "created": "2026-03-04T02:19:30.788996+00:00",
+  "updated": "2026-03-04T02:19:30.789010+00:00",
+  "status": "active",
+  "mode": "linear",
+  "workspace": "",
+  "pipeline": [
+    "search-agent",
+    "design-agent",
+    "code-agent",
+    "test-agent",
+    "docs-agent",
+    "review-agent"
+  ],
+  "currentStage": "search-agent",
+  "stages": {
+    "search-agent": {
+      "agent": "search-agent",
+      "status": "pending",
+      "task": "",
+      "startedAt": null,
+      "completedAt": null,
+      "output": "",
+      "logs": []
+    },
+    "design-agent": {
+      "agent": "design-agent",
+      "status": "pending",
+      "task": "",
+      "startedAt": null,
+      "completedAt": null,
+      "output": "",
+      "logs": []
+    },
+    "code-agent": {
+      "agent": "code-agent",
+      "status": "pending",
+      "task": "",
+      "startedAt": null,
+      "completedAt": null,
+      "output": "",
+      "logs": []
+    },
+    "test-agent": {
+      "agent": "test-agent",
+      "status": "pending",
+      "task": "",
+      "startedAt": null,
+      "completedAt": null,
+      "output": "",
+      "logs": []
+    },
+    "docs-agent": {
+      "agent": "docs-agent",
+      "status": "pending",
+      "task": "",
+      "startedAt": null,
+      "completedAt": null,
+      "output": "",
+      "logs": []
+    },
+    "review-agent": {
+      "agent": "review-agent",
+      "status": "pending",
+      "task": "",
+      "startedAt": null,
+      "completedAt": null,
+      "output": "",
+      "logs": []
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "id": "2d6f92c7-a636-42a4-9835-43b9468835ec",
+  "enqueuedAt": 1772548198395,
+  "channel": "discord",
+  "to": "heartbeat",
+  "payloads": [
+    {
+      "text": "Service monitor completed. All services healthy.\n\n**Status at 22:29:50:**\n- ✅ habit-daemon running (PID: 3209)\n- Uptime: ~30 minutes (started at 21:59:30 after auto-restart)"
+    }
+  ],
+  "threadId": null,
+  "mirror": {
+    "sessionKey": "agent:main:discord:channel:heartbeat",
+    "agentId": "main",
+    "text": "Service monitor completed. All services healthy.\n\n**Status at 22:29:50:**\n- ✅ habit-daemon running (PID: 3209)\n- Uptime: ~30 minutes (started at 21:59:30 after auto-restart)"
+  },
+  "retryCount": 5,
+  "lastAttemptAt": 1772583297766,
+  "lastError": "fetch failed"
+}

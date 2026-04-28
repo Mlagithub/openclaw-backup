@@ -1,0 +1,191 @@
+{
+  "version": 1,
+  "jobs": [
+    {
+      "id": "a907a0e6-bd85-46ed-a2d5-b0760e5343a1",
+      "agentId": "main",
+      "name": "Daily Tech News Digest",
+      "enabled": true,
+      "createdAtMs": 1771929300024,
+      "updatedAtMs": 1777327466584,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 0 6 * * ?",
+        "tz": "Asia/Shanghai"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "Read /home/one/.openclaw/skills/tech-news-digest/references/digest-prompt.md and follow the complete workflow to generate a daily digest.\n\nReplace placeholders with:\n- MODE = daily\n- TIME_WINDOW = past 1-2 days\n- FRESHNESS = pd\n- RSS_HOURS = 48\n- ITEMS_PER_SECTION = 8-10\n- BLOG_PICKS_COUNT = 3-5\n- EXTRA_SECTIONS = (none)\n- SUBJECT = Daily Tech Digest - YYYY-MM-DD\n- WORKSPACE = /home/one/.openclaw/agents/main/workspace\n- SKILL_DIR = /home/one/.openclaw/skills/tech-news-digest\n- DISCORD_CHANNEL_ID = 1475710747114737717\n- EMAIL = (none)\n- LANGUAGE = Chinese\n- TEMPLATE = discord\n\nThe digest should include these topics: LLM, AI Agent, Crypto, Frontier Tech, Biotech, Programming, Geopolitics, Military\n\nFollow every step in the prompt template strictly. Do not skip any steps.",
+        "thinking": "high"
+      },
+      "delivery": {
+        "mode": "announce",
+        "channel": "discord",
+        "to": "1475722914904014958",
+        "bestEffort": false
+      },
+      "state": {
+        "nextRunAtMs": 1777413600000,
+        "lastRunAtMs": 1777327200039,
+        "lastStatus": "error",
+        "lastDurationMs": 266545,
+        "consecutiveErrors": 1,
+        "lastRunStatus": "error",
+        "lastDeliveryStatus": "unknown",
+        "lastError": "FallbackSummaryError: All models failed (4): bailian/glm-5: HTTP 401: invalid access token or token expired (auth) | minimax-portal/MiniMax-M2.5: HTTP 500 api_error: your current token plan not support model, MiniMax-M2.5 (2061) (timeout) | bailian/qwen3.5-plus: HTTP 401: invalid access token or token expired (auth) | zhipu/glm-4v: HTTP 404: \"Not Found\" (model_not_found)",
+        "lastErrorReason": "model_not_found"
+      },
+      "deleteAfterRun": false
+    },
+    {
+      "id": "866851f5-f1bb-4aec-899b-1bad43b7c205",
+      "name": "openclaw-repo-monitor",
+      "enabled": true,
+      "createdAtMs": 1774186982899,
+      "updatedAtMs": 1777340635177,
+      "schedule": {
+        "kind": "every",
+        "everyMs": 86400000,
+        "anchorMs": 1775136953777
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "检查 https://github.com/openclaw/openclaw 仓库最近一天的合并提交（merged PR）。\n\n使用 web_fetch 或 gh CLI 获取最近一天的 commits 和 PR merges。总结改动内容，\n重点关注 apps/android 目录下的功能改进和 BUG 修复。\n\n格式要求：\n1. 列出主要改动 \n2. 重点标注 Android app 相关变更 \n3. 如果没有改动则说明'无新提交'。\n\n最后使用 message tool 发送总结到 Telegram 用户 ID: 6021596770"
+      },
+      "delivery": {
+        "mode": "none",
+        "channel": "telegram",
+        "to": "6021596770",
+        "bestEffort": false
+      },
+      "state": {
+        "nextRunAtMs": 1777427004509,
+        "lastRunAtMs": 1777340604509,
+        "lastRunStatus": "error",
+        "lastStatus": "error",
+        "lastDurationMs": 30668,
+        "lastDeliveryStatus": "not-requested",
+        "consecutiveErrors": 1,
+        "lastError": "FallbackSummaryError: All models failed (4): bailian/glm-5: HTTP 401: invalid access token or token expired (auth) | minimax-portal/MiniMax-M2.5: HTTP 500 api_error: your current token plan not support model, MiniMax-M2.5 (2061) (timeout) | bailian/qwen3.5-plus: HTTP 401: invalid access token or token expired (auth) | zhipu/glm-4v: HTTP 404: \"Not Found\" (model_not_found)",
+        "lastErrorReason": "model_not_found"
+      },
+      "deleteAfterRun": false
+    },
+    {
+      "id": "702d1ec9-8d56-447f-9c18-184311a1a7e9",
+      "agentId": "main",
+      "name": "gsd-repo-monitor",
+      "enabled": true,
+      "createdAtMs": 1774247428808,
+      "updatedAtMs": 1777336634625,
+      "schedule": {
+        "kind": "every",
+        "everyMs": 86400000,
+        "anchorMs": 1775136889170
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "检查 https://github.com/gsd-build/get-shit-done 仓库最近一天的活动。\n\n使用 web_fetch 获取 GitHub API 数据：\n1) https://api.github.com/repos/gsd-build/get-shit-done/commits \n2) https://api.github.com/repos/gsd-build/get-shit-done/pulls?state=closed 。\n\n筛选最近一天的 commits 和 merged PRs。总结改动内容，格式要求：\n1. 列出主要改动（commit message + 作者 + 时间）\n2. 对于 PR merge，详细说明改动内容 \n3. 如果没有改动则说明'无新提交'。\n\n最后使用 message tool 发送总结到 Telegram 用户 ID: 6021596770"
+      },
+      "delivery": {
+        "mode": "none",
+        "channel": "telegram",
+        "to": "6021596770",
+        "bestEffort": false
+      },
+      "state": {
+        "nextRunAtMs": 1777423004968,
+        "lastRunAtMs": 1777336604968,
+        "lastRunStatus": "error",
+        "lastStatus": "error",
+        "lastDurationMs": 29657,
+        "lastDeliveryStatus": "not-requested",
+        "consecutiveErrors": 1,
+        "lastError": "FallbackSummaryError: All models failed (4): bailian/glm-5: HTTP 401: invalid access token or token expired (auth) | minimax-portal/MiniMax-M2.5: HTTP 500 api_error: your current token plan not support model, MiniMax-M2.5 (2061) (timeout) | bailian/qwen3.5-plus: HTTP 401: invalid access token or token expired (auth) | zhipu/glm-4v: HTTP 404: \"Not Found\" (model_not_found)",
+        "lastErrorReason": "model_not_found"
+      },
+      "deleteAfterRun": false
+    },
+    {
+      "id": "05b0ad64-cccf-4fcb-9f5e-4150af0829ad",
+      "agentId": "main",
+      "sessionKey": "agent:main:telegram:group:-1003806517659:topic:109",
+      "name": "friend-challenge",
+      "enabled": true,
+      "createdAtMs": 1774862963487,
+      "updatedAtMs": 1777370603426,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 7,11,18 * * *",
+        "tz": "Asia/Shanghai"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "# 角色设定\n你是一个具有\"跨学科洞察力\"的数字密友，深谙系统论、东方哲学与前沿科技，拒绝平庸，直击本质。\n\n# 任务流程\n\n## 第一步：随机采集（每次从以下池中随机选 2-3 个方向）\n\n**外部动态池**（随机选 1-2 个）：\n- AI Agent / LLM 进化\n- 长寿医学 / 生命科学\n- 天文 / 量子力学 / 物理前沿\n- 认知科学 / 神经科学\n- 博弈论 / 复杂性理论 / 系统论\n- 禅宗 / 唯识 / 东方哲学新解读\n- 当代社会现象（技术失业、文化冲突、代际焦虑）\n- 历史事件（今天的历史纪念日或相似情境）\n\n**人文视野池**（随机选 1 个）：\n- 近期争议性哲学命题\n- 当代艺术策展主题\n- 文学批评热点\n- 美学/艺术理论新动向\n\n**内省数据**（必选）：\n- /mnt/c/Users/one/Documents/notes 随机一条旧感悟\n- /mnt/c/Users/one/Documents/notes/人生记录.md 人生记录\n\n## 第二步：动态构造跨界问题\n\n不要使用预设的对撞模式。而是：\n1. 分析今天采集到的外部动态 + 人文视野 + 内省数据\n2. 找到它们之间的\"张力点\"或\"交叉点\"\n3. 基于【用户背景】，构造一个能引发深度思考的具体问题\n\n**构造问题的核心原则：**\n- 必须有张力（两个视角的碰撞）\n- 必须具体（不是泛泛的\"你怎么看\"，而是\"在X情境下，Y意味着什么\")\n- 必须指向认知突破（让用户不得不重新审视某个假设或惯性）\n- 可以是挑衅性的（但不攻击人格）\n\n**张力类型示例**（仅供参考，不要每次都用）：\n- 外部技术 vs 内部体验\n- 科学解释 vs 哲学直觉\n- 社会焦虑 vs 个人修行\n- 历史镜像 vs 当下选择\n- 美学视角 vs 实用主义\n\n## 第三步：输出\n\n格式要求：\n- 不寒暄，严禁说\"你好\"，直接切入\n- 一句话或一段话，120字内\n- 必须引用一个具体的采集内容（笔记原文、新闻标题、习惯追踪数据）\n- 问题要有刺点，让用户不得不思考\n\n发送到 Telegram 用户 6021596770\n\n# 用户背景\n- 止一，C++5年工业求解器经验\n- 关注 LLM/AI-Agent 前沿\n- 人生目标：探索人体奥秘，健康活到100岁\n- 深度实践：站桩、打坐、气功、武术\n- 思考方向：儒释道哲学、认知与意识、AI与人的边界\n- 对宇宙充满敬畏与幻想",
+        "thinking": "high"
+      },
+      "delivery": {
+        "mode": "none",
+        "channel": "telegram",
+        "to": "6021596770",
+        "bestEffort": false
+      },
+      "state": {
+        "nextRunAtMs": 1777417200000,
+        "lastRunAtMs": 1777370400046,
+        "lastRunStatus": "error",
+        "lastStatus": "error",
+        "lastDurationMs": 203380,
+        "lastDeliveryStatus": "not-requested",
+        "consecutiveErrors": 3,
+        "lastErrorReason": "model_not_found",
+        "lastError": "FallbackSummaryError: All models failed (4): bailian/glm-5: HTTP 401: invalid access token or token expired (auth) | minimax-portal/MiniMax-M2.5: HTTP 500 api_error: your current token plan not support model, MiniMax-M2.5 (2061) (timeout) | bailian/qwen3.5-plus: HTTP 401: invalid access token or token expired (auth) | zhipu/glm-4v: HTTP 404: \"Not Found\" (model_not_found)"
+      },
+      "deleteAfterRun": false
+    },
+    {
+      "id": "6eb65827-cada-4183-b9ea-e1685aeccf61",
+      "agentId": "main",
+      "sessionKey": "agent:main:main",
+      "name": "daily-output-reminder",
+      "enabled": true,
+      "deleteAfterRun": false,
+      "createdAtMs": 1775136493930,
+      "updatedAtMs": 1777334568395,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 0 8 * * ?",
+        "tz": "Asia/Shanghai"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "作为朋友，帮助用户进行认知突破。\n\n搜集信息：\n1) web_search 搜索昨天的热点时事新闻、科技动态（AI、前沿科技、生物、政治等）\n2) read MEMORY.md 和 memory/*.md 了解用户长期关注点和思考方向\n3) 检查 obsidian 笔记 /mnt/c/Users/one/Documents/notes 最近内容\n\n结合外部热点 + 用户关注点，构造一个能引发深度思考的具体问题或话题，让用户进行写作输出。\n\n要求：\n- 问题要有张力，能激发认知突破\n- 不是简单的事实性问题，而是需要思考、判断、重构的问题\n- 结合用户背景：站桩实践、对AI与认知的思考、儒释道哲学、人体奥秘探索、C++求解器经验\n- 不寒暄，直接给出问题，100字内\n\n示例：\n- 「DeepMind说AI能发现新物理定律了——你站桩体验的'气感'，有没有可能也是某种未描述的物理现象？」\n- 「今天看到一个观点：'真正学习发生在输出时'——你最近有没有哪个想法写了但没整理成笔记？」\n\n最后使用 message tool 发送到 Telegram 用户 6021596770。",
+        "thinking": "high"
+      },
+      "delivery": {
+        "mode": "none"
+      },
+      "state": {
+        "nextRunAtMs": 1777420800000,
+        "lastRunAtMs": 1777334400016,
+        "lastRunStatus": "error",
+        "lastStatus": "error",
+        "lastDurationMs": 168379,
+        "lastDeliveryStatus": "not-requested",
+        "consecutiveErrors": 1,
+        "lastError": "FallbackSummaryError: All models failed (4): bailian/glm-5: HTTP 401: invalid access token or token expired (auth) | minimax-portal/MiniMax-M2.5: HTTP 500 api_error: your current token plan not support model, MiniMax-M2.5 (2061) (timeout) | bailian/qwen3.5-plus: HTTP 401: invalid access token or token expired (auth) | zhipu/glm-4v: HTTP 404: \"Not Found\" (model_not_found)",
+        "lastErrorReason": "model_not_found"
+      }
+    }
+  ]
+}

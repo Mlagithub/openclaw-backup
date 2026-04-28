@@ -1,0 +1,692 @@
+// app.js - Habit Tracker Frontend (Optimized)
+
+// =====================
+// Data Cache System
+// =====================
+const Cache = {
+  data: {},
+  timestamps: {},
+  TTL: 5000, // 5 seconds
+  
+  get(key) {
+    const now = Date.now();
+    if (this.data[key] && (now - this.timestamps[key]) < this.TTL) {
+      return this.data[key];
+    }
+    return null;
+  },
+  
+  set(key, value) {
+    this.data[key] = value;
+    this.timestamps[key] = Date.now();
+  },
+  
+  invalidate(pattern) {
+    for (const key in this.data) {
+      if (pattern && key.includes(pattern)) {
+        delete this.data[key];
+        delete this.timestamps[key];
+      } else if (!pattern) {
+        delete this.data[key];
+        delete this.timestamps[key];
+      }
+    }
+  }
+};
+
+// =====================
+// API Helpers
+// =====================
+const API = {
+  async get(url, useCache = true) {
+    const cacheKey = url;
+    if (useCache) {
+      const cached = Cache.get(cacheKey);
+      if (cached) return cached;
+    }
+    
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    
+    if (useCache) Cache.set(cacheKey, data);
+    return data;
+  },
+  
+  async post(url, body) {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  },
+  
+  async put(url, body) {
+    const res = await fetch(url, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  },
+  
+  async delete(url) {
+    const res = await fetch(url, { method: 'DELETE' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  }
+};
+
+// =====================
+// State
+// =====================
+let habits = [];
+let currentMonth = new Date();
+
+// =====================
+// Toast Notifications
+// =====================
+function showToast(message, isError = false) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${isError ? 'error' : ''}`;
+  toast.innerHTML = `<span>${isError ? '❌' : '✅'}</span> ${message}`;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+// =====================
+// Theme Toggle
+// =====================
+function toggleTheme() {
+  document.body.classList.toggle('dark');
+  const isDark = document.body.classList.contains('dark');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  document.querySelector('.theme-toggle').textContent = isDark ? '☀️' : '🌙';
+}
+
+function initTheme() {
+  const saved = localStorage.getItem('theme');
+  if (saved === 'dark') {
+    document.body.classList.add('dark');
+    document.querySelector('.theme-toggle').textContent = '☀️';
+  }
+}
+
+// =====================
+// Tab Navigation
+// =====================
+function switchTab(tabName) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.tab[data-tab="${tabName}"]`).classList.add('active');
+  
+  document.querySelectorAll('[id^="tab-"]').forEach(p => p.classList.add('hidden'));
+  document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+  
+  if (tabName === 'calendar') renderCalendar();
+  if (tabName === 'meals') renderMeals();
+  if (tabName === 'history') renderHistory();
+}
+
+// =====================
+// Habits Management
+// =====================
+async function loadHabits() {
+  try {
+    habits = await API.get('/api/habits');
+    renderHabits();
+    renderQuickActions();
+    updateStats();
+    updateHistoryFilter();
+  } catch (err) {
+    console.error('Failed to load habits:', err);
+    showToast('加载习惯失败', true);
+  }
+}
+
+function renderHabits() {
+  const container = document.getElementById('habitsList');
+  if (habits.length === 0) {
+    container.innerHTML = '<div class="empty"><div class="empty-icon">📝</div><div class="empty-text">还没有习惯，添加一个吧</div></div>';
+    return;
+  }
+  
+  container.innerHTML = habits.map(h => `
+    <div class="habit-item ${h.today_checkins > 0 ? 'checked' : ''}" data-id="${h.id}">
+      <div class="habit-check ${h.today_checkins > 0 ? 'checked' : ''}" onclick="toggleCheckin(${h.id})"></div>
+      <div class="habit-content">
+        <div class="habit-name">${escapeHtml(h.name)}</div>
+        <div class="habit-meta">
+          ${h.reminder_hours ? `<span class="habit-time">⏰ ${h.reminder_hours}</span>` : ''}
+          <span class="habit-streak" data-streak="${h.id}">🔥 加载中...</span>
+        </div>
+      </div>
+      <div class="habit-actions">
+        <button class="btn btn-xs btn-ghost" onclick="deleteHabit(${h.id})" title="删除">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+  
+  // Load streaks
+  habits.forEach(h => loadStreak(h.id));
+}
+
+async function loadStreak(habitId) {
+  try {
+    const { streak } = await API.get(`/api/habits/${habitId}/streak`);
+    const el = document.querySelector(`[data-streak="${habitId}"]`);
+    if (el) el.textContent = `🔥 ${streak} 天`;
+  } catch (err) {
+    console.error('Failed to load streak:', err);
+  }
+}
+
+function renderQuickActions() {
+  const container = document.getElementById('quickActions');
+  const icons = { '早餐': '🌅', '午餐': '☀️', '晚餐': '🌙', '站桩': '🧘', '阅读': '📖', '起床': '🌤️', '上床': '🌃', '零食': '🍪', '三省吾身': '🤔' };
+  
+  container.innerHTML = habits
+    .map(h => {
+      const icon = icons[h.name] || '✓';
+      const done = h.today_checkins > 0;
+      return `<button class="quick-btn ${done ? 'done' : ''}" onclick="quickCheckin(${h.id})">${icon} ${h.name}</button>`;
+    }).join('');
+}
+
+function updateStats() {
+  document.getElementById('totalCount').textContent = habits.length;
+  document.getElementById('todayCount').textContent = habits.filter(h => h.today_checkins > 0).length;
+  
+  // Calculate max streak
+  let maxStreak = 0;
+  habits.forEach(h => {
+    const el = document.querySelector(`[data-streak="${h.id}"]`);
+    if (el) {
+      const match = el.textContent.match(/🔥 (\d+)/);
+      if (match && parseInt(match[1]) > maxStreak) {
+        maxStreak = parseInt(match[1]);
+      }
+    }
+  });
+  document.getElementById('streakMax').textContent = maxStreak;
+}
+
+async function addHabit() {
+  const nameInput = document.getElementById('newHabitName');
+  const timeInput = document.getElementById('newHabitTime');
+  const name = nameInput.value.trim();
+  
+  if (!name) {
+    showToast('请输入习惯名称', true);
+    return;
+  }
+  
+  try {
+    await API.post('/api/habits', { name, reminder_hours: timeInput.value.trim() });
+    nameInput.value = '';
+    timeInput.value = '';
+    Cache.invalidate('/api/habits');
+    await loadHabits();
+    showToast('添加成功');
+  } catch (err) {
+    console.error('Failed to add habit:', err);
+    showToast('添加失败: ' + err.message, true);
+  }
+}
+
+async function deleteHabit(id) {
+  if (!confirm('确定删除这个习惯吗？相关记录也会被删除。')) return;
+  
+  try {
+    await API.delete(`/api/habits/${id}`);
+    Cache.invalidate('/api/habits');
+    await loadHabits();
+    showToast('已删除');
+  } catch (err) {
+    console.error('Failed to delete habit:', err);
+    showToast('删除失败', true);
+  }
+}
+
+async function toggleCheckin(habitId) {
+  try {
+    const result = await API.post('/api/checkin', { habitId });
+    Cache.invalidate('/api/habits');
+    await loadHabits();
+    showToast('打卡成功');
+  } catch (err) {
+    console.error('Failed to checkin:', err);
+    showToast('打卡失败', true);
+  }
+}
+
+async function quickCheckin(habitId) {
+  const note = prompt('备注（可选）:');
+  if (note === null) return;
+  
+  try {
+    await API.post('/api/checkin', { habitId, note: note || '' });
+    Cache.invalidate('/api/habits');
+    await loadHabits();
+    showToast('打卡成功');
+  } catch (err) {
+    console.error('Failed to checkin:', err);
+    showToast('打卡失败', true);
+  }
+}
+
+// =====================
+// Calendar
+// =====================
+async function renderCalendar() {
+  const grid = document.getElementById('calendarGrid');
+  const title = document.getElementById('calendarTitle');
+  
+  const year = currentMonth.getFullYear();
+  const month = currentMonth.getMonth();
+  
+  title.textContent = `${year}年${month + 1}月`;
+  
+  // Get checked dates for this month
+  const start = new Date(year, month, 1);
+  const end = new Date(year, month + 1, 0);
+  const startStr = formatDateISO(start);
+  const endStr = formatDateISO(end);
+  
+  let checkedDates = [];
+  try {
+    const stats = await API.get(`/api/stats/daily?start=${startStr}&end=${endStr}`);
+    checkedDates = stats.map(s => s.date);
+  } catch (err) {
+    console.error('Failed to load stats:', err);
+  }
+  
+  const today = formatDateISO(new Date());
+  const days = ['日', '一', '二', '三', '四', '五', '六'];
+  
+  let html = days.map(d => `<div class="calendar-day-header">${d}</div>`).join('');
+  
+  const firstDay = start.getDay();
+  const daysInMonth = end.getDate();
+  const prevMonthDays = new Date(year, month, 0).getDate();
+  
+  // Previous month days
+  for (let i = firstDay - 1; i >= 0; i--) {
+    html += `<div class="calendar-day other-month">${prevMonthDays - i}</div>`;
+  }
+  
+  // Current month days
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const isToday = dateStr === today;
+    const isChecked = checkedDates.includes(dateStr);
+    
+    let classes = 'calendar-day';
+    if (isToday) classes += ' today';
+    if (isChecked) classes += ' checked';
+    
+    html += `<div class="${classes}" onclick="showDateDetail('${dateStr}')">${d}</div>`;
+  }
+  
+  // Next month days
+  const remaining = 42 - (firstDay + daysInMonth);
+  for (let d = 1; d <= remaining; d++) {
+    html += `<div class="calendar-day other-month">${d}</div>`;
+  }
+  
+  grid.innerHTML = html;
+}
+
+function changeMonth(delta) {
+  currentMonth.setMonth(currentMonth.getMonth() + delta);
+  renderCalendar();
+}
+
+async function showDateDetail(dateStr) {
+  try {
+    const checkins = await API.get(`/api/checkins?start=${dateStr}&end=${dateStr}`);
+    const modal = document.getElementById('modalOverlay');
+    const title = document.getElementById('modalTitle');
+    const body = document.getElementById('modalBody');
+    
+    title.textContent = `📅 ${dateStr}`;
+    
+    if (checkins.length === 0) {
+      body.innerHTML = '<div class="empty"><div class="empty-text">这一天没有打卡记录</div></div>';
+    } else {
+      body.innerHTML = checkins.map(c => `
+        <div class="record-item">
+          <div class="record-header">
+            <span class="record-habit-name">${escapeHtml(c.name)}</span>
+            <span class="record-time">${c.checked_at.split(' ')[1]}</span>
+          </div>
+          <div class="record-note ${!c.note ? 'empty' : ''}">${escapeHtml(c.note) || '无备注'}</div>
+        </div>
+      `).join('');
+    }
+    
+    modal.classList.add('show');
+  } catch (err) {
+    console.error('Failed to load date detail:', err);
+    showToast('加载失败', true);
+  }
+}
+
+// =====================
+// Meals
+// =====================
+async function renderMeals() {
+  const container = document.getElementById('mealsList');
+  
+  try {
+    const meals = await API.get('/api/meals/today');
+    const mealNames = ['早餐', '午餐', '晚餐'];
+    const icons = { '早餐': '🌅', '午餐': '☀️', '晚餐': '🌙' };
+    
+    container.innerHTML = mealNames.map(name => {
+      const meal = meals.find(m => m.name === name);
+      const icon = icons[name];
+      
+      return `
+        <div class="meal-card">
+          <div class="meal-icon">${icon}</div>
+          <div class="meal-content">
+            <div class="meal-name">${name}</div>
+            <div class="meal-note ${!meal?.note ? 'empty' : ''}">${escapeHtml(meal?.note) || '还没记录'}</div>
+            ${meal ? `<div class="meal-status">✅ 已记录</div>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch (err) {
+    console.error('Failed to load meals:', err);
+    container.innerHTML = '<div class="empty"><div class="empty-text">加载失败</div></div>';
+  }
+}
+
+// =====================
+// History
+// =====================
+function updateHistoryFilter() {
+  const select = document.getElementById('historyHabitFilter');
+  select.innerHTML = '<option value="">全部习惯</option>' + 
+    habits.map(h => `<option value="${h.id}">${escapeHtml(h.name)}</option>`).join('');
+  
+  // Initialize date pickers with default values
+  initDatePickers();
+}
+
+function initDatePickers() {
+  const startDateInput = document.getElementById('startDate');
+  const endDateInput = document.getElementById('endDate');
+  
+  // Set default end date to today
+  const today = new Date();
+  endDateInput.value = formatDateISO(today);
+  
+  // Set default start date to 30 days ago
+  const thirtyDaysAgo = new Date(today);
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 29); // 30 days including today
+  startDateInput.value = formatDateISO(thirtyDaysAgo);
+}
+
+function onDaysFilterChange() {
+  const daysFilter = document.getElementById('historyDaysFilter');
+  const datePickerBar = document.getElementById('datePickerBar');
+  
+  if (daysFilter.value === 'custom') {
+    datePickerBar.classList.remove('hidden');
+    // Initialize dates if not set
+    if (!document.getElementById('startDate').value || !document.getElementById('endDate').value) {
+      initDatePickers();
+    }
+  } else {
+    datePickerBar.classList.add('hidden');
+    renderHistory();
+  }
+}
+
+function searchByDateRange() {
+  const startDate = document.getElementById('startDate').value;
+  const endDate = document.getElementById('endDate').value;
+  
+  if (!startDate || !endDate) {
+    showToast('请选择开始和结束日期', true);
+    return;
+  }
+  
+  if (startDate > endDate) {
+    showToast('开始日期不能晚于结束日期', true);
+    return;
+  }
+  
+  renderHistory();
+}
+
+async function renderHistory() {
+  const container = document.getElementById('historyList');
+  const habitId = document.getElementById('historyHabitFilter').value;
+  const daysFilter = document.getElementById('historyDaysFilter').value;
+  
+  let apiUrl;
+  
+  if (daysFilter === 'custom') {
+    // Use custom date range
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    
+    if (!startDate || !endDate) {
+      container.innerHTML = '<div class="empty"><div class="empty-icon">📅</div><div class="empty-text">请选择日期范围</div></div>';
+      return;
+    }
+    
+    if (startDate > endDate) {
+      container.innerHTML = '<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-text">开始日期不能晚于结束日期</div></div>';
+      return;
+    }
+    
+    apiUrl = `/api/history?start=${startDate}&end=${endDate}${habitId ? '&habitId=' + habitId : ''}`;
+  } else {
+    // Use days filter
+    apiUrl = `/api/history?days=${daysFilter}${habitId ? '&habitId=' + habitId : ''}`;
+  }
+  
+  try {
+    const response = await API.get(apiUrl);
+    
+    // Handle both paginated and legacy response formats
+    const records = response.data || response;
+    
+    if (!records || records.length === 0) {
+      container.innerHTML = '<div class="empty"><div class="empty-icon">📜</div><div class="empty-text">暂无记录</div></div>';
+      return;
+    }
+    
+    // Group by date
+    const grouped = {};
+    records.forEach(c => {
+      if (!grouped[c.check_date]) grouped[c.check_date] = [];
+      grouped[c.check_date].push(c);
+    });
+    
+    container.innerHTML = Object.entries(grouped)
+      .sort((a, b) => b[0].localeCompare(a[0]))
+      .map(([date, records]) => renderDateGroup(date, records))
+      .join('');
+  } catch (err) {
+    console.error('Failed to load history:', err);
+    container.innerHTML = '<div class="empty"><div class="empty-text">加载失败</div></div>';
+  }
+}
+
+function renderDateGroup(date, records) {
+  const dateObj = new Date(date);
+  const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+  const weekday = weekdays[dateObj.getDay()];
+  
+  return `
+    <div class="date-group">
+      <div class="date-group-header" onclick="toggleDateGroup(this)">
+        <span class="date-group-title">📅 ${date} ${weekday}</span>
+        <div class="date-group-stats">
+          <span class="date-group-badge">${records.length} 条</span>
+          <span class="date-group-toggle">▼</span>
+        </div>
+      </div>
+      <div class="date-group-content" style="max-height: ${records.length * 80}px">
+        ${records.map(r => renderRecordItem(r)).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderRecordItem(record) {
+  // Use data-note attribute to avoid XSS from inline handlers
+  const escapedNote = escapeHtml(record.note || '');
+  return `
+    <div class="record-item" data-id="${record.id}" data-note="${escapedNote}">
+      <div class="record-header">
+        <span class="record-habit-name">📌 ${escapeHtml(record.habit_name)}</span>
+        <span class="record-time">🕐 ${record.check_time || ''}</span>
+        <div class="record-actions">
+          <button class="record-btn edit" onclick="editRecordFromData(this)" title="编辑">✏️</button>
+          <button class="record-btn delete" onclick="deleteRecordFromData(this)" title="删除">🗑️</button>
+        </div>
+      </div>
+      <div class="record-note ${!record.note ? 'empty' : ''}">${escapeHtml(record.note) || '无备注'}</div>
+    </div>
+  `;
+}
+
+function toggleDateGroup(header) {
+  header.parentElement.classList.toggle('collapsed');
+}
+
+// =====================
+// Record Operations (Unified)
+// =====================
+
+// Edit record using data attribute (XSS-safe)
+function editRecordFromData(btn) {
+  const item = btn.closest('.record-item');
+  const id = parseInt(item.dataset.id);
+  const currentNote = item.dataset.note || '';
+  editRecord(id, currentNote, item);
+}
+
+// Delete record using data attribute (XSS-safe)
+async function deleteRecordFromData(btn) {
+  const item = btn.closest('.record-item');
+  const id = parseInt(item.dataset.id);
+  await deleteRecord(id);
+}
+
+function editRecord(id, currentNote, item) {
+  const noteEl = item.querySelector('.record-note');
+  const currentText = currentNote || '';
+  
+  noteEl.innerHTML = `
+    <div class="record-edit-form">
+      <input type="text" class="record-edit-input" value="${escapeHtml(currentText)}" placeholder="输入新备注...">
+      <button class="btn btn-xs btn-primary" onclick="saveRecordEdit(${id}, this)">保存</button>
+      <button class="btn btn-xs btn-secondary" onclick="cancelRecordEdit(${id}, this)">取消</button>
+    </div>
+  `;
+}
+
+async function saveRecordEdit(id, btn) {
+  const input = btn.previousElementSibling;
+  const note = input.value.trim();
+  
+  try {
+    await API.put(`/api/checkins/${id}`, { note });
+    Cache.invalidate('/api/history');
+    showToast('保存成功');
+    renderHistory();
+  } catch (err) {
+    console.error('Failed to save:', err);
+    showToast('保存失败', true);
+  }
+}
+
+function cancelRecordEdit(id, btn) {
+  const item = document.querySelector(`.record-item[data-id="${id}"]`);
+  const originalNote = item.dataset.note || '';
+  const noteEl = item.querySelector('.record-note');
+  noteEl.className = `record-note ${!originalNote ? 'empty' : ''}`;
+  noteEl.textContent = originalNote || '无备注';
+}
+
+async function deleteRecord(id) {
+  if (!confirm('确定删除这条记录吗？')) return;
+  
+  try {
+    await API.delete(`/api/checkins/${id}`);
+    Cache.invalidate('/api/history');
+    showToast('已删除');
+    renderHistory();
+  } catch (err) {
+    console.error('Failed to delete:', err);
+    showToast('删除失败', true);
+  }
+}
+
+// =====================
+// Modal
+// =====================
+function closeModal(event) {
+  if (event && event.target !== document.getElementById('modalOverlay')) return;
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+// =====================
+// Utility Functions
+// =====================
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+}
+
+function formatDateISO(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+// =====================
+// Service Worker Registration
+// =====================
+async function registerServiceWorker() {
+  if ('serviceWorker' in navigator) {
+    try {
+      const reg = await navigator.serviceWorker.register('/sw.js');
+      console.log('Service Worker registered:', reg.scope);
+    } catch (err) {
+      console.log('Service Worker registration failed:', err);
+    }
+  }
+}
+
+// =====================
+// Initialize
+// =====================
+document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
+  loadHabits();
+  registerServiceWorker();
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeModal();
+  }
+});

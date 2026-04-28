@@ -1,0 +1,2119 @@
+{
+  "agent:dev-agent:subagent:d0f8e835-dd8f-44fa-b2c6-1be9c4c0765d": {
+    "sessionId": "0342f718-24c1-499d-97d2-566897d2dbbe",
+    "updatedAt": 1775971721672,
+    "spawnDepth": 1,
+    "subagentRole": "orchestrator",
+    "subagentControlScope": "children",
+    "model": "qwen3.5-plus",
+    "modelProvider": "bailian",
+    "spawnedBy": "agent:main:main",
+    "spawnedWorkspaceDir": "/home/one/.openclaw/agents/dev-agent/workspace",
+    "deliveryContext": {
+      "channel": "telegram"
+    },
+    "lastChannel": "telegram",
+    "channel": "telegram",
+    "skillsSnapshot": {
+      "prompt": "\n\nThe following skills provide specialized instructions for specific tasks.\nUse the read tool to load a skill's file when the task matches its description.\nWhen a skill file references a relative path, resolve it against the skill directory (parent of SKILL.md / dirname of the path) and use that absolute path in tool commands.\n\n<available_skills>\n  <skill>\n    <name>clawflow</name>\n    <description>Use when work should span one or more detached tasks but still behave like one job with a single owner context. ClawFlow is the runtime substrate under authoring layers like Lobster, acpx, or plain code. Keep conditional logic in the caller; use ClawFlow for flow identity, waiting, outputs, and user-facing emergence.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/clawflow/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>clawflow-inbox-triage</name>\n    <description>Example ClawFlow authoring pattern for inbox triage. Use when messages need different treatment based on intent, with some routes notifying immediately, some waiting on outside answers, and others rolling into a later summary.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/clawflow-inbox-triage/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>clawhub</name>\n    <description>Use the ClawHub CLI to search, install, update, and publish agent skills from clawhub.com. Use when you need to fetch new skills on the fly, sync installed skills to latest or a specific version, or publish new/updated skill folders with the npm-installed clawhub CLI.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/clawhub/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>coding-agent</name>\n    <description>Delegate coding tasks to Codex, Claude Code, or Pi agents via background process. Use when: (1) building/creating new features or apps, (2) reviewing PRs (spawn in temp dir), (3) refactoring large codebases, (4) iterative coding that needs file exploration. NOT for: simple one-liner fixes (just edit), reading code (use read tool), thread-bound ACP harness requests in chat (for example spawn/run Codex or Claude Code in a Discord thread; use sessions_spawn with runtime:&quot;acp&quot;), or any work in ~/clawd workspace (never spawn agents here). Claude Code: use --print --permission-mode bypassPermissions (no PTY). Codex/Pi/OpenCode: pty:true required.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/coding-agent/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>discord</name>\n    <description>Discord ops via the message tool (channel=discord).</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/discord/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>gemini</name>\n    <description>Gemini CLI for one-shot Q&amp;A, summaries, and generation.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/gemini/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>healthcheck</name>\n    <description>Host security hardening and risk-tolerance configuration for OpenClaw deployments. Use when a user asks for security audits, firewall/SSH/update hardening, risk posture, exposure review, OpenClaw cron scheduling for periodic checks, or version status checks on a machine running OpenClaw (laptop, workstation, Pi, VPS).</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/healthcheck/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>mcporter</name>\n    <description>Use the mcporter CLI to list, configure, auth, and call MCP servers/tools directly (HTTP or stdio), including ad-hoc servers, config edits, and CLI/type generation.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/mcporter/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>node-connect</name>\n    <description>Diagnose OpenClaw node connection and pairing failures for Android, iOS, and macOS companion apps. Use when QR/setup code/manual connect fails, local Wi-Fi works but VPS/tailnet does not, or errors mention pairing required, unauthorized, bootstrap token invalid or expired, gateway.bind, gateway.remote.url, Tailscale, or plugins.entries.device-pair.config.publicUrl.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/node-connect/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>session-logs</name>\n    <description>Search and analyze your own session logs (older/parent conversations) using jq.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/session-logs/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>skill-creator</name>\n    <description>Create, edit, improve, or audit AgentSkills. Use when creating a new skill from scratch or when asked to improve, review, audit, tidy up, or clean up an existing skill or SKILL.md file. Also use when editing or restructuring a skill directory (moving files to references/ or scripts/, removing stale content, validating against the AgentSkills spec). Triggers on phrases like &quot;create a skill&quot;, &quot;author a skill&quot;, &quot;tidy up a skill&quot;, &quot;improve this skill&quot;, &quot;review the skill&quot;, &quot;clean up the skill&quot;, &quot;audit the skill&quot;.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/skill-creator/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>tmux</name>\n    <description>Remote-control tmux sessions for interactive CLIs by sending keystrokes and scraping pane output.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/tmux/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>video-frames</name>\n    <description>Extract frames or short clips from videos using ffmpeg.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/video-frames/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>weather</name>\n    <description>Get current weather and forecasts via wttr.in or Open-Meteo. Use when: user asks about weather, temperature, or forecasts for any location. NOT for: historical weather data, severe weather alerts, or detailed meteorological analysis. No API key needed.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/weather/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>fsrs-memory</name>\n    <description>FSRS 间隔重复记忆系统 - 真正实时 Discord 提醒</description>\n    <location>~/.openclaw/skills/fsrs-memory/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>habit-tracker</name>\n    <description>习惯打卡系统 - 在 Discord 中添加习惯、打卡、统计，支持自动提醒</description>\n    <location>~/.openclaw/skills/habit-tracker/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>openclaw-backup-optimized</name>\n    <description>Optimized OpenClaw backup skill for creating full snapshots with workspace archive splitting, change summaries, restore instructions, and Discord notifications. Use when you need to set up or run automated backups, configure backup cron jobs, or document/restore OpenClaw state. Triggers on backup automation, backup scripts, snapshot/restore, or GitHub backup repos.</description>\n    <location>~/.openclaw/skills/openclaw-backup-optimized/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>second-brain</name>\n    <description>个人知识库管理系统 - 保存笔记、链接、想法、书籍笔记</description>\n    <location>~/.openclaw/skills/second-brain/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>self-improvement</name>\n    <description>Captures learnings, errors, and corrections to enable continuous improvement. Use when: (1) A command or operation fails unexpectedly, (2) User corrects Claude (&apos;No, that&apos;s wrong...&apos;, &apos;Actually...&apos;), (3) User requests a capability that doesn&apos;t exist, (4) An external API or tool fails, (5) Claude realizes its knowledge is outdated or incorrect, (6) A better approach is discovered for a recurring task. Also review learnings before major tasks.</description>\n    <location>~/.openclaw/skills/self-improving-agent/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>tech-news-digest</name>\n    <description>Generate tech news digests with unified source model, quality scoring, and multi-format output. Five-layer data collection from RSS feeds, Twitter/X KOLs, GitHub releases, Reddit, and web search. Pipeline-based scripts with retry mechanisms and deduplication. Supports Discord, email, and markdown templates.</description>\n    <location>~/.openclaw/skills/tech-news-digest/SKILL.md</location>\n  </skill>\n</available_skills>",
+      "skills": [
+        {
+          "name": "clawflow"
+        },
+        {
+          "name": "clawflow-inbox-triage"
+        },
+        {
+          "name": "clawhub",
+          "requiredEnv": []
+        },
+        {
+          "name": "coding-agent",
+          "requiredEnv": []
+        },
+        {
+          "name": "discord",
+          "requiredEnv": []
+        },
+        {
+          "name": "gemini",
+          "requiredEnv": []
+        },
+        {
+          "name": "healthcheck"
+        },
+        {
+          "name": "mcporter",
+          "requiredEnv": []
+        },
+        {
+          "name": "node-connect"
+        },
+        {
+          "name": "session-logs",
+          "requiredEnv": []
+        },
+        {
+          "name": "skill-creator"
+        },
+        {
+          "name": "tmux",
+          "requiredEnv": []
+        },
+        {
+          "name": "video-frames",
+          "requiredEnv": []
+        },
+        {
+          "name": "weather",
+          "requiredEnv": []
+        },
+        {
+          "name": "fsrs-memory",
+          "requiredEnv": []
+        },
+        {
+          "name": "habit-tracker",
+          "requiredEnv": []
+        },
+        {
+          "name": "openclaw-backup-optimized"
+        },
+        {
+          "name": "second-brain",
+          "requiredEnv": []
+        },
+        {
+          "name": "self-improvement"
+        },
+        {
+          "name": "tech-news-digest",
+          "requiredEnv": []
+        }
+      ],
+      "resolvedSkills": [
+        {
+          "name": "clawflow",
+          "description": "Use when work should span one or more detached tasks but still behave like one job with a single owner context. ClawFlow is the runtime substrate under authoring layers like Lobster, acpx, or plain code. Keep conditional logic in the caller; use ClawFlow for flow identity, waiting, outputs, and user-facing emergence.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/clawflow/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/clawflow",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/clawflow/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/clawflow"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "clawflow-inbox-triage",
+          "description": "Example ClawFlow authoring pattern for inbox triage. Use when messages need different treatment based on intent, with some routes notifying immediately, some waiting on outside answers, and others rolling into a later summary.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/clawflow-inbox-triage/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/clawflow-inbox-triage",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/clawflow-inbox-triage/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/clawflow-inbox-triage"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "clawhub",
+          "description": "Use the ClawHub CLI to search, install, update, and publish agent skills from clawhub.com. Use when you need to fetch new skills on the fly, sync installed skills to latest or a specific version, or publish new/updated skill folders with the npm-installed clawhub CLI.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/clawhub/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/clawhub",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/clawhub/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/clawhub"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "coding-agent",
+          "description": "Delegate coding tasks to Codex, Claude Code, or Pi agents via background process. Use when: (1) building/creating new features or apps, (2) reviewing PRs (spawn in temp dir), (3) refactoring large codebases, (4) iterative coding that needs file exploration. NOT for: simple one-liner fixes (just edit), reading code (use read tool), thread-bound ACP harness requests in chat (for example spawn/run Codex or Claude Code in a Discord thread; use sessions_spawn with runtime:\"acp\"), or any work in ~/clawd workspace (never spawn agents here). Claude Code: use --print --permission-mode bypassPermissions (no PTY). Codex/Pi/OpenCode: pty:true required.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/coding-agent/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/coding-agent",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/coding-agent/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/coding-agent"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "discord",
+          "description": "Discord ops via the message tool (channel=discord).",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/discord/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/discord",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/discord/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/discord"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "gemini",
+          "description": "Gemini CLI for one-shot Q&A, summaries, and generation.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/gemini/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/gemini",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/gemini/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/gemini"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "healthcheck",
+          "description": "Host security hardening and risk-tolerance configuration for OpenClaw deployments. Use when a user asks for security audits, firewall/SSH/update hardening, risk posture, exposure review, OpenClaw cron scheduling for periodic checks, or version status checks on a machine running OpenClaw (laptop, workstation, Pi, VPS).",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/healthcheck/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/healthcheck",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/healthcheck/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/healthcheck"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "mcporter",
+          "description": "Use the mcporter CLI to list, configure, auth, and call MCP servers/tools directly (HTTP or stdio), including ad-hoc servers, config edits, and CLI/type generation.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/mcporter/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/mcporter",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/mcporter/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/mcporter"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "node-connect",
+          "description": "Diagnose OpenClaw node connection and pairing failures for Android, iOS, and macOS companion apps. Use when QR/setup code/manual connect fails, local Wi-Fi works but VPS/tailnet does not, or errors mention pairing required, unauthorized, bootstrap token invalid or expired, gateway.bind, gateway.remote.url, Tailscale, or plugins.entries.device-pair.config.publicUrl.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/node-connect/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/node-connect",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/node-connect/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/node-connect"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "session-logs",
+          "description": "Search and analyze your own session logs (older/parent conversations) using jq.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/session-logs/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/session-logs",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/session-logs/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/session-logs"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "skill-creator",
+          "description": "Create, edit, improve, or audit AgentSkills. Use when creating a new skill from scratch or when asked to improve, review, audit, tidy up, or clean up an existing skill or SKILL.md file. Also use when editing or restructuring a skill directory (moving files to references/ or scripts/, removing stale content, validating against the AgentSkills spec). Triggers on phrases like \"create a skill\", \"author a skill\", \"tidy up a skill\", \"improve this skill\", \"review the skill\", \"clean up the skill\", \"audit the skill\".",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/skill-creator/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/skill-creator",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/skill-creator/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/skill-creator"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "tmux",
+          "description": "Remote-control tmux sessions for interactive CLIs by sending keystrokes and scraping pane output.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/tmux/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/tmux",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/tmux/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/tmux"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "video-frames",
+          "description": "Extract frames or short clips from videos using ffmpeg.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/video-frames/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/video-frames",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/video-frames/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/video-frames"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "weather",
+          "description": "Get current weather and forecasts via wttr.in or Open-Meteo. Use when: user asks about weather, temperature, or forecasts for any location. NOT for: historical weather data, severe weather alerts, or detailed meteorological analysis. No API key needed.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/weather/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/weather",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/weather/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/weather"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "fsrs-memory",
+          "description": "FSRS 间隔重复记忆系统 - 真正实时 Discord 提醒",
+          "filePath": "/home/one/.openclaw/skills/fsrs-memory/SKILL.md",
+          "baseDir": "/home/one/.openclaw/skills/fsrs-memory",
+          "source": "openclaw-managed",
+          "sourceInfo": {
+            "path": "/home/one/.openclaw/skills/fsrs-memory/SKILL.md",
+            "source": "openclaw-managed",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.openclaw/skills/fsrs-memory"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "habit-tracker",
+          "description": "习惯打卡系统 - 在 Discord 中添加习惯、打卡、统计，支持自动提醒",
+          "filePath": "/home/one/.openclaw/skills/habit-tracker/SKILL.md",
+          "baseDir": "/home/one/.openclaw/skills/habit-tracker",
+          "source": "openclaw-managed",
+          "sourceInfo": {
+            "path": "/home/one/.openclaw/skills/habit-tracker/SKILL.md",
+            "source": "openclaw-managed",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.openclaw/skills/habit-tracker"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "openclaw-backup-optimized",
+          "description": "Optimized OpenClaw backup skill for creating full snapshots with workspace archive splitting, change summaries, restore instructions, and Discord notifications. Use when you need to set up or run automated backups, configure backup cron jobs, or document/restore OpenClaw state. Triggers on backup automation, backup scripts, snapshot/restore, or GitHub backup repos.",
+          "filePath": "/home/one/.openclaw/skills/openclaw-backup-optimized/SKILL.md",
+          "baseDir": "/home/one/.openclaw/skills/openclaw-backup-optimized",
+          "source": "openclaw-managed",
+          "sourceInfo": {
+            "path": "/home/one/.openclaw/skills/openclaw-backup-optimized/SKILL.md",
+            "source": "openclaw-managed",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.openclaw/skills/openclaw-backup-optimized"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "second-brain",
+          "description": "个人知识库管理系统 - 保存笔记、链接、想法、书籍笔记",
+          "filePath": "/home/one/.openclaw/skills/second-brain/SKILL.md",
+          "baseDir": "/home/one/.openclaw/skills/second-brain",
+          "source": "openclaw-managed",
+          "sourceInfo": {
+            "path": "/home/one/.openclaw/skills/second-brain/SKILL.md",
+            "source": "openclaw-managed",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.openclaw/skills/second-brain"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "self-improvement",
+          "description": "Captures learnings, errors, and corrections to enable continuous improvement. Use when: (1) A command or operation fails unexpectedly, (2) User corrects Claude ('No, that's wrong...', 'Actually...'), (3) User requests a capability that doesn't exist, (4) An external API or tool fails, (5) Claude realizes its knowledge is outdated or incorrect, (6) A better approach is discovered for a recurring task. Also review learnings before major tasks.",
+          "filePath": "/home/one/.openclaw/skills/self-improving-agent/SKILL.md",
+          "baseDir": "/home/one/.openclaw/skills/self-improving-agent",
+          "source": "openclaw-managed",
+          "sourceInfo": {
+            "path": "/home/one/.openclaw/skills/self-improving-agent/SKILL.md",
+            "source": "openclaw-managed",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.openclaw/skills/self-improving-agent"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "tech-news-digest",
+          "description": "Generate tech news digests with unified source model, quality scoring, and multi-format output. Five-layer data collection from RSS feeds, Twitter/X KOLs, GitHub releases, Reddit, and web search. Pipeline-based scripts with retry mechanisms and deduplication. Supports Discord, email, and markdown templates.",
+          "filePath": "/home/one/.openclaw/skills/tech-news-digest/SKILL.md",
+          "baseDir": "/home/one/.openclaw/skills/tech-news-digest",
+          "source": "openclaw-managed",
+          "sourceInfo": {
+            "path": "/home/one/.openclaw/skills/tech-news-digest/SKILL.md",
+            "source": "openclaw-managed",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.openclaw/skills/tech-news-digest"
+          },
+          "disableModelInvocation": false
+        }
+      ],
+      "version": 0
+    },
+    "sessionFile": "/home/one/.openclaw/agents/dev-agent/sessions/0342f718-24c1-499d-97d2-566897d2dbbe.jsonl",
+    "status": "done",
+    "startedAt": 1775970604295,
+    "abortedLastRun": false,
+    "endedAt": 1775971721553,
+    "runtimeMs": 486026,
+    "contextTokens": 1000000,
+    "systemPromptReport": {
+      "source": "run",
+      "generatedAt": 1775971235504,
+      "sessionId": "0342f718-24c1-499d-97d2-566897d2dbbe",
+      "sessionKey": "agent:dev-agent:subagent:d0f8e835-dd8f-44fa-b2c6-1be9c4c0765d",
+      "provider": "bailian",
+      "model": "qwen3.5-plus",
+      "workspaceDir": "/home/one/.openclaw/agents/dev-agent/workspace",
+      "bootstrapMaxChars": 20000,
+      "bootstrapTotalMaxChars": 150000,
+      "bootstrapTruncation": {
+        "warningMode": "once",
+        "warningShown": false,
+        "truncatedFiles": 0,
+        "nearLimitFiles": 0,
+        "totalNearLimit": false
+      },
+      "sandbox": {
+        "mode": "off",
+        "sandboxed": false
+      },
+      "systemPrompt": {
+        "chars": 25600,
+        "projectContextChars": 6577,
+        "nonProjectContextChars": 19023
+      },
+      "injectedWorkspaceFiles": [
+        {
+          "name": "AGENTS.md",
+          "path": "/home/one/.openclaw/agents/dev-agent/workspace/AGENTS.md",
+          "missing": false,
+          "rawChars": 2304,
+          "injectedChars": 2304,
+          "truncated": false
+        },
+        {
+          "name": "SOUL.md",
+          "path": "/home/one/.openclaw/agents/dev-agent/workspace/SOUL.md",
+          "missing": false,
+          "rawChars": 2293,
+          "injectedChars": 2293,
+          "truncated": false
+        },
+        {
+          "name": "TOOLS.md",
+          "path": "/home/one/.openclaw/agents/dev-agent/workspace/TOOLS.md",
+          "missing": false,
+          "rawChars": 469,
+          "injectedChars": 469,
+          "truncated": false
+        },
+        {
+          "name": "IDENTITY.md",
+          "path": "/home/one/.openclaw/agents/dev-agent/workspace/IDENTITY.md",
+          "missing": false,
+          "rawChars": 206,
+          "injectedChars": 206,
+          "truncated": false
+        },
+        {
+          "name": "USER.md",
+          "path": "/home/one/.openclaw/agents/dev-agent/workspace/USER.md",
+          "missing": false,
+          "rawChars": 421,
+          "injectedChars": 421,
+          "truncated": false
+        }
+      ],
+      "skills": {
+        "promptChars": 8469,
+        "entries": [
+          {
+            "name": "clawflow",
+            "blockChars": 484
+          },
+          {
+            "name": "clawflow-inbox-triage",
+            "blockChars": 418
+          },
+          {
+            "name": "clawhub",
+            "blockChars": 432
+          },
+          {
+            "name": "coding-agent",
+            "blockChars": 832
+          },
+          {
+            "name": "discord",
+            "blockChars": 215
+          },
+          {
+            "name": "gemini",
+            "blockChars": 221
+          },
+          {
+            "name": "healthcheck",
+            "blockChars": 491
+          },
+          {
+            "name": "mcporter",
+            "blockChars": 330
+          },
+          {
+            "name": "node-connect",
+            "blockChars": 541
+          },
+          {
+            "name": "session-logs",
+            "blockChars": 253
+          },
+          {
+            "name": "skill-creator",
+            "blockChars": 759
+          },
+          {
+            "name": "tmux",
+            "blockChars": 255
+          },
+          {
+            "name": "video-frames",
+            "blockChars": 229
+          },
+          {
+            "name": "weather",
+            "blockChars": 416
+          },
+          {
+            "name": "fsrs-memory",
+            "blockChars": 175
+          },
+          {
+            "name": "habit-tracker",
+            "blockChars": 185
+          },
+          {
+            "name": "openclaw-backup-optimized",
+            "blockChars": 539
+          },
+          {
+            "name": "second-brain",
+            "blockChars": 173
+          },
+          {
+            "name": "self-improvement",
+            "blockChars": 633
+          },
+          {
+            "name": "tech-news-digest",
+            "blockChars": 462
+          }
+        ]
+      },
+      "tools": {
+        "listChars": 1699,
+        "schemaChars": 19831,
+        "entries": [
+          {
+            "name": "read",
+            "summaryChars": 298,
+            "schemaChars": 574,
+            "propertiesCount": 6
+          },
+          {
+            "name": "edit",
+            "summaryChars": 326,
+            "schemaChars": 1103,
+            "propertiesCount": 5
+          },
+          {
+            "name": "write",
+            "summaryChars": 127,
+            "schemaChars": 497,
+            "propertiesCount": 5
+          },
+          {
+            "name": "exec",
+            "summaryChars": 181,
+            "schemaChars": 1098,
+            "propertiesCount": 12
+          },
+          {
+            "name": "process",
+            "summaryChars": 85,
+            "schemaChars": 961,
+            "propertiesCount": 12
+          },
+          {
+            "name": "canvas",
+            "summaryChars": 106,
+            "schemaChars": 661,
+            "propertiesCount": 18
+          },
+          {
+            "name": "message",
+            "summaryChars": 600,
+            "schemaChars": 7192,
+            "propertiesCount": 109
+          },
+          {
+            "name": "tts",
+            "summaryChars": 152,
+            "schemaChars": 223,
+            "propertiesCount": 2
+          },
+          {
+            "name": "image_generate",
+            "summaryChars": 435,
+            "schemaChars": 1195,
+            "propertiesCount": 10
+          },
+          {
+            "name": "sessions_list",
+            "summaryChars": 54,
+            "schemaChars": 212,
+            "propertiesCount": 4
+          },
+          {
+            "name": "sessions_history",
+            "summaryChars": 36,
+            "schemaChars": 161,
+            "propertiesCount": 3
+          },
+          {
+            "name": "sessions_yield",
+            "summaryChars": 97,
+            "schemaChars": 60,
+            "propertiesCount": 1
+          },
+          {
+            "name": "sessions_spawn",
+            "summaryChars": 198,
+            "schemaChars": 1179,
+            "propertiesCount": 17
+          },
+          {
+            "name": "subagents",
+            "summaryChars": 105,
+            "schemaChars": 191,
+            "propertiesCount": 4
+          },
+          {
+            "name": "web_search",
+            "summaryChars": 175,
+            "schemaChars": 1084,
+            "propertiesCount": 9
+          },
+          {
+            "name": "web_fetch",
+            "summaryChars": 129,
+            "schemaChars": 374,
+            "propertiesCount": 3
+          },
+          {
+            "name": "browser",
+            "summaryChars": 1066,
+            "schemaChars": 2799,
+            "propertiesCount": 48
+          },
+          {
+            "name": "memory_search",
+            "summaryChars": 334,
+            "schemaChars": 139,
+            "propertiesCount": 3
+          },
+          {
+            "name": "memory_get",
+            "summaryChars": 151,
+            "schemaChars": 128,
+            "propertiesCount": 3
+          }
+        ]
+      }
+    }
+  },
+  "agent:dev-agent:subagent:704cc8b3-c2b7-4453-b8a0-732dd68dbba2": {
+    "sessionId": "dc1daa28-eb02-479c-9712-3092433c376b",
+    "updatedAt": 1775988138155,
+    "spawnDepth": 1,
+    "subagentRole": "orchestrator",
+    "subagentControlScope": "children",
+    "model": "glm-5",
+    "modelProvider": "bailian",
+    "spawnedBy": "agent:main:main",
+    "spawnedWorkspaceDir": "/home/one/.openclaw/agents/dev-agent/workspace",
+    "deliveryContext": {
+      "channel": "telegram",
+      "to": "telegram:6021596770",
+      "accountId": "default"
+    },
+    "lastChannel": "telegram",
+    "lastTo": "telegram:6021596770",
+    "lastAccountId": "default",
+    "channel": "telegram",
+    "skillsSnapshot": {
+      "prompt": "\n\nThe following skills provide specialized instructions for specific tasks.\nUse the read tool to load a skill's file when the task matches its description.\nWhen a skill file references a relative path, resolve it against the skill directory (parent of SKILL.md / dirname of the path) and use that absolute path in tool commands.\n\n<available_skills>\n  <skill>\n    <name>clawhub</name>\n    <description>Use the ClawHub CLI to search, install, update, and publish agent skills from clawhub.com. Use when you need to fetch new skills on the fly, sync installed skills to latest or a specific version, or publish new/updated skill folders with the npm-installed clawhub CLI.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/clawhub/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>coding-agent</name>\n    <description>Delegate coding tasks to Codex, Claude Code, or Pi agents via background process. Use when: (1) building/creating new features or apps, (2) reviewing PRs (spawn in temp dir), (3) refactoring large codebases, (4) iterative coding that needs file exploration. NOT for: simple one-liner fixes (just edit), reading code (use read tool), thread-bound ACP harness requests in chat (for example spawn/run Codex or Claude Code in a Discord thread; use sessions_spawn with runtime:&quot;acp&quot;), or any work in ~/clawd workspace (never spawn agents here). Claude Code: use --print --permission-mode bypassPermissions (no PTY). Codex/Pi/OpenCode: pty:true required.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/coding-agent/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>discord</name>\n    <description>Discord ops via the message tool (channel=discord).</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/discord/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>gemini</name>\n    <description>Gemini CLI for one-shot Q&amp;A, summaries, and generation.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/gemini/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>healthcheck</name>\n    <description>Host security hardening and risk-tolerance configuration for OpenClaw deployments. Use when a user asks for security audits, firewall/SSH/update hardening, risk posture, exposure review, OpenClaw cron scheduling for periodic checks, or version status checks on a machine running OpenClaw (laptop, workstation, Pi, VPS).</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/healthcheck/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>mcporter</name>\n    <description>Use the mcporter CLI to list, configure, auth, and call MCP servers/tools directly (HTTP or stdio), including ad-hoc servers, config edits, and CLI/type generation.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/mcporter/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>node-connect</name>\n    <description>Diagnose OpenClaw node connection and pairing failures for Android, iOS, and macOS companion apps. Use when QR/setup code/manual connect fails, local Wi-Fi works but VPS/tailnet does not, or errors mention pairing required, unauthorized, bootstrap token invalid or expired, gateway.bind, gateway.remote.url, Tailscale, or plugins.entries.device-pair.config.publicUrl.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/node-connect/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>session-logs</name>\n    <description>Search and analyze your own session logs (older/parent conversations) using jq.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/session-logs/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>skill-creator</name>\n    <description>Create, edit, improve, or audit AgentSkills. Use when creating a new skill from scratch or when asked to improve, review, audit, tidy up, or clean up an existing skill or SKILL.md file. Also use when editing or restructuring a skill directory (moving files to references/ or scripts/, removing stale content, validating against the AgentSkills spec). Triggers on phrases like &quot;create a skill&quot;, &quot;author a skill&quot;, &quot;tidy up a skill&quot;, &quot;improve this skill&quot;, &quot;review the skill&quot;, &quot;clean up the skill&quot;, &quot;audit the skill&quot;.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/skill-creator/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>taskflow</name>\n    <description>Use when work should span one or more detached tasks but still behave like one job with a single owner context. TaskFlow is the durable flow substrate under authoring layers like Lobster, ACPX, plugins, or plain code. Keep conditional logic in the caller; use TaskFlow for flow identity, child-task linkage, waiting state, revision-checked mutations, and user-facing emergence.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/taskflow/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>taskflow-inbox-triage</name>\n    <description>Example TaskFlow authoring pattern for inbox triage. Use when messages need different treatment based on intent, with some routes notifying immediately, some waiting on outside answers, and others rolling into a later summary.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/taskflow-inbox-triage/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>tmux</name>\n    <description>Remote-control tmux sessions for interactive CLIs by sending keystrokes and scraping pane output.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/tmux/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>video-frames</name>\n    <description>Extract frames or short clips from videos using ffmpeg.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/video-frames/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>weather</name>\n    <description>Get current weather and forecasts via wttr.in or Open-Meteo. Use when: user asks about weather, temperature, or forecasts for any location. NOT for: historical weather data, severe weather alerts, or detailed meteorological analysis. No API key needed.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/weather/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>fsrs-memory</name>\n    <description>FSRS 间隔重复记忆系统 - 真正实时 Discord 提醒</description>\n    <location>~/.openclaw/skills/fsrs-memory/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>habit-tracker</name>\n    <description>习惯打卡系统 - 在 Discord 中添加习惯、打卡、统计，支持自动提醒</description>\n    <location>~/.openclaw/skills/habit-tracker/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>openclaw-backup-optimized</name>\n    <description>Optimized OpenClaw backup skill for creating full snapshots with workspace archive splitting, change summaries, restore instructions, and Discord notifications. Use when you need to set up or run automated backups, configure backup cron jobs, or document/restore OpenClaw state. Triggers on backup automation, backup scripts, snapshot/restore, or GitHub backup repos.</description>\n    <location>~/.openclaw/skills/openclaw-backup-optimized/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>second-brain</name>\n    <description>个人知识库管理系统 - 保存笔记、链接、想法、书籍笔记</description>\n    <location>~/.openclaw/skills/second-brain/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>self-improvement</name>\n    <description>Captures learnings, errors, and corrections to enable continuous improvement. Use when: (1) A command or operation fails unexpectedly, (2) User corrects Claude (&apos;No, that&apos;s wrong...&apos;, &apos;Actually...&apos;), (3) User requests a capability that doesn&apos;t exist, (4) An external API or tool fails, (5) Claude realizes its knowledge is outdated or incorrect, (6) A better approach is discovered for a recurring task. Also review learnings before major tasks.</description>\n    <location>~/.openclaw/skills/self-improving-agent/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>tech-news-digest</name>\n    <description>Generate tech news digests with unified source model, quality scoring, and multi-format output. Five-layer data collection from RSS feeds, Twitter/X KOLs, GitHub releases, Reddit, and web search. Pipeline-based scripts with retry mechanisms and deduplication. Supports Discord, email, and markdown templates.</description>\n    <location>~/.openclaw/skills/tech-news-digest/SKILL.md</location>\n  </skill>\n</available_skills>",
+      "skills": [
+        {
+          "name": "clawhub",
+          "requiredEnv": []
+        },
+        {
+          "name": "coding-agent",
+          "requiredEnv": []
+        },
+        {
+          "name": "discord",
+          "requiredEnv": []
+        },
+        {
+          "name": "gemini",
+          "requiredEnv": []
+        },
+        {
+          "name": "healthcheck"
+        },
+        {
+          "name": "mcporter",
+          "requiredEnv": []
+        },
+        {
+          "name": "node-connect"
+        },
+        {
+          "name": "session-logs",
+          "requiredEnv": []
+        },
+        {
+          "name": "skill-creator"
+        },
+        {
+          "name": "taskflow"
+        },
+        {
+          "name": "taskflow-inbox-triage"
+        },
+        {
+          "name": "tmux",
+          "requiredEnv": []
+        },
+        {
+          "name": "video-frames",
+          "requiredEnv": []
+        },
+        {
+          "name": "weather",
+          "requiredEnv": []
+        },
+        {
+          "name": "fsrs-memory",
+          "requiredEnv": []
+        },
+        {
+          "name": "habit-tracker",
+          "requiredEnv": []
+        },
+        {
+          "name": "openclaw-backup-optimized"
+        },
+        {
+          "name": "second-brain",
+          "requiredEnv": []
+        },
+        {
+          "name": "self-improvement"
+        },
+        {
+          "name": "tech-news-digest",
+          "requiredEnv": []
+        }
+      ],
+      "resolvedSkills": [
+        {
+          "name": "clawhub",
+          "description": "Use the ClawHub CLI to search, install, update, and publish agent skills from clawhub.com. Use when you need to fetch new skills on the fly, sync installed skills to latest or a specific version, or publish new/updated skill folders with the npm-installed clawhub CLI.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/clawhub/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/clawhub",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/clawhub/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/clawhub"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "coding-agent",
+          "description": "Delegate coding tasks to Codex, Claude Code, or Pi agents via background process. Use when: (1) building/creating new features or apps, (2) reviewing PRs (spawn in temp dir), (3) refactoring large codebases, (4) iterative coding that needs file exploration. NOT for: simple one-liner fixes (just edit), reading code (use read tool), thread-bound ACP harness requests in chat (for example spawn/run Codex or Claude Code in a Discord thread; use sessions_spawn with runtime:\"acp\"), or any work in ~/clawd workspace (never spawn agents here). Claude Code: use --print --permission-mode bypassPermissions (no PTY). Codex/Pi/OpenCode: pty:true required.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/coding-agent/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/coding-agent",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/coding-agent/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/coding-agent"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "discord",
+          "description": "Discord ops via the message tool (channel=discord).",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/discord/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/discord",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/discord/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/discord"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "gemini",
+          "description": "Gemini CLI for one-shot Q&A, summaries, and generation.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/gemini/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/gemini",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/gemini/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/gemini"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "healthcheck",
+          "description": "Host security hardening and risk-tolerance configuration for OpenClaw deployments. Use when a user asks for security audits, firewall/SSH/update hardening, risk posture, exposure review, OpenClaw cron scheduling for periodic checks, or version status checks on a machine running OpenClaw (laptop, workstation, Pi, VPS).",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/healthcheck/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/healthcheck",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/healthcheck/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/healthcheck"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "mcporter",
+          "description": "Use the mcporter CLI to list, configure, auth, and call MCP servers/tools directly (HTTP or stdio), including ad-hoc servers, config edits, and CLI/type generation.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/mcporter/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/mcporter",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/mcporter/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/mcporter"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "node-connect",
+          "description": "Diagnose OpenClaw node connection and pairing failures for Android, iOS, and macOS companion apps. Use when QR/setup code/manual connect fails, local Wi-Fi works but VPS/tailnet does not, or errors mention pairing required, unauthorized, bootstrap token invalid or expired, gateway.bind, gateway.remote.url, Tailscale, or plugins.entries.device-pair.config.publicUrl.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/node-connect/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/node-connect",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/node-connect/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/node-connect"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "session-logs",
+          "description": "Search and analyze your own session logs (older/parent conversations) using jq.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/session-logs/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/session-logs",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/session-logs/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/session-logs"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "skill-creator",
+          "description": "Create, edit, improve, or audit AgentSkills. Use when creating a new skill from scratch or when asked to improve, review, audit, tidy up, or clean up an existing skill or SKILL.md file. Also use when editing or restructuring a skill directory (moving files to references/ or scripts/, removing stale content, validating against the AgentSkills spec). Triggers on phrases like \"create a skill\", \"author a skill\", \"tidy up a skill\", \"improve this skill\", \"review the skill\", \"clean up the skill\", \"audit the skill\".",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/skill-creator/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/skill-creator",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/skill-creator/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/skill-creator"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "taskflow",
+          "description": "Use when work should span one or more detached tasks but still behave like one job with a single owner context. TaskFlow is the durable flow substrate under authoring layers like Lobster, ACPX, plugins, or plain code. Keep conditional logic in the caller; use TaskFlow for flow identity, child-task linkage, waiting state, revision-checked mutations, and user-facing emergence.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/taskflow/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/taskflow",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/taskflow/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/taskflow"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "taskflow-inbox-triage",
+          "description": "Example TaskFlow authoring pattern for inbox triage. Use when messages need different treatment based on intent, with some routes notifying immediately, some waiting on outside answers, and others rolling into a later summary.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/taskflow-inbox-triage/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/taskflow-inbox-triage",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/taskflow-inbox-triage/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/taskflow-inbox-triage"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "tmux",
+          "description": "Remote-control tmux sessions for interactive CLIs by sending keystrokes and scraping pane output.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/tmux/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/tmux",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/tmux/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/tmux"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "video-frames",
+          "description": "Extract frames or short clips from videos using ffmpeg.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/video-frames/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/video-frames",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/video-frames/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/video-frames"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "weather",
+          "description": "Get current weather and forecasts via wttr.in or Open-Meteo. Use when: user asks about weather, temperature, or forecasts for any location. NOT for: historical weather data, severe weather alerts, or detailed meteorological analysis. No API key needed.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/weather/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/weather",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/weather/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/weather"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "fsrs-memory",
+          "description": "FSRS 间隔重复记忆系统 - 真正实时 Discord 提醒",
+          "filePath": "/home/one/.openclaw/skills/fsrs-memory/SKILL.md",
+          "baseDir": "/home/one/.openclaw/skills/fsrs-memory",
+          "source": "openclaw-managed",
+          "sourceInfo": {
+            "path": "/home/one/.openclaw/skills/fsrs-memory/SKILL.md",
+            "source": "openclaw-managed",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.openclaw/skills/fsrs-memory"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "habit-tracker",
+          "description": "习惯打卡系统 - 在 Discord 中添加习惯、打卡、统计，支持自动提醒",
+          "filePath": "/home/one/.openclaw/skills/habit-tracker/SKILL.md",
+          "baseDir": "/home/one/.openclaw/skills/habit-tracker",
+          "source": "openclaw-managed",
+          "sourceInfo": {
+            "path": "/home/one/.openclaw/skills/habit-tracker/SKILL.md",
+            "source": "openclaw-managed",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.openclaw/skills/habit-tracker"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "openclaw-backup-optimized",
+          "description": "Optimized OpenClaw backup skill for creating full snapshots with workspace archive splitting, change summaries, restore instructions, and Discord notifications. Use when you need to set up or run automated backups, configure backup cron jobs, or document/restore OpenClaw state. Triggers on backup automation, backup scripts, snapshot/restore, or GitHub backup repos.",
+          "filePath": "/home/one/.openclaw/skills/openclaw-backup-optimized/SKILL.md",
+          "baseDir": "/home/one/.openclaw/skills/openclaw-backup-optimized",
+          "source": "openclaw-managed",
+          "sourceInfo": {
+            "path": "/home/one/.openclaw/skills/openclaw-backup-optimized/SKILL.md",
+            "source": "openclaw-managed",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.openclaw/skills/openclaw-backup-optimized"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "second-brain",
+          "description": "个人知识库管理系统 - 保存笔记、链接、想法、书籍笔记",
+          "filePath": "/home/one/.openclaw/skills/second-brain/SKILL.md",
+          "baseDir": "/home/one/.openclaw/skills/second-brain",
+          "source": "openclaw-managed",
+          "sourceInfo": {
+            "path": "/home/one/.openclaw/skills/second-brain/SKILL.md",
+            "source": "openclaw-managed",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.openclaw/skills/second-brain"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "self-improvement",
+          "description": "Captures learnings, errors, and corrections to enable continuous improvement. Use when: (1) A command or operation fails unexpectedly, (2) User corrects Claude ('No, that's wrong...', 'Actually...'), (3) User requests a capability that doesn't exist, (4) An external API or tool fails, (5) Claude realizes its knowledge is outdated or incorrect, (6) A better approach is discovered for a recurring task. Also review learnings before major tasks.",
+          "filePath": "/home/one/.openclaw/skills/self-improving-agent/SKILL.md",
+          "baseDir": "/home/one/.openclaw/skills/self-improving-agent",
+          "source": "openclaw-managed",
+          "sourceInfo": {
+            "path": "/home/one/.openclaw/skills/self-improving-agent/SKILL.md",
+            "source": "openclaw-managed",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.openclaw/skills/self-improving-agent"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "tech-news-digest",
+          "description": "Generate tech news digests with unified source model, quality scoring, and multi-format output. Five-layer data collection from RSS feeds, Twitter/X KOLs, GitHub releases, Reddit, and web search. Pipeline-based scripts with retry mechanisms and deduplication. Supports Discord, email, and markdown templates.",
+          "filePath": "/home/one/.openclaw/skills/tech-news-digest/SKILL.md",
+          "baseDir": "/home/one/.openclaw/skills/tech-news-digest",
+          "source": "openclaw-managed",
+          "sourceInfo": {
+            "path": "/home/one/.openclaw/skills/tech-news-digest/SKILL.md",
+            "source": "openclaw-managed",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.openclaw/skills/tech-news-digest"
+          },
+          "disableModelInvocation": false
+        }
+      ],
+      "version": 0
+    },
+    "sessionFile": "/home/one/.openclaw/agents/dev-agent/sessions/dc1daa28-eb02-479c-9712-3092433c376b.jsonl",
+    "status": "done",
+    "startedAt": 1775987487358,
+    "abortedLastRun": false,
+    "endedAt": 1775988138056,
+    "runtimeMs": 640284,
+    "contextTokens": 202752,
+    "systemPromptReport": {
+      "source": "run",
+      "generatedAt": 1775987497757,
+      "sessionId": "dc1daa28-eb02-479c-9712-3092433c376b",
+      "sessionKey": "agent:dev-agent:subagent:704cc8b3-c2b7-4453-b8a0-732dd68dbba2",
+      "provider": "bailian",
+      "model": "glm-5",
+      "workspaceDir": "/home/one/.openclaw/agents/dev-agent/workspace",
+      "bootstrapMaxChars": 20000,
+      "bootstrapTotalMaxChars": 150000,
+      "bootstrapTruncation": {
+        "warningMode": "once",
+        "warningShown": false,
+        "truncatedFiles": 0,
+        "nearLimitFiles": 0,
+        "totalNearLimit": false
+      },
+      "sandbox": {
+        "mode": "off",
+        "sandboxed": false
+      },
+      "systemPrompt": {
+        "chars": 24852,
+        "projectContextChars": 10411,
+        "nonProjectContextChars": 14441
+      },
+      "injectedWorkspaceFiles": [
+        {
+          "name": "AGENTS.md",
+          "path": "/home/one/.openclaw/agents/dev-agent/workspace/AGENTS.md",
+          "missing": false,
+          "rawChars": 2304,
+          "injectedChars": 2304,
+          "truncated": false
+        },
+        {
+          "name": "SOUL.md",
+          "path": "/home/one/.openclaw/agents/dev-agent/workspace/SOUL.md",
+          "missing": false,
+          "rawChars": 2293,
+          "injectedChars": 2293,
+          "truncated": false
+        },
+        {
+          "name": "TOOLS.md",
+          "path": "/home/one/.openclaw/agents/dev-agent/workspace/TOOLS.md",
+          "missing": false,
+          "rawChars": 469,
+          "injectedChars": 469,
+          "truncated": false
+        },
+        {
+          "name": "IDENTITY.md",
+          "path": "/home/one/.openclaw/agents/dev-agent/workspace/IDENTITY.md",
+          "missing": false,
+          "rawChars": 206,
+          "injectedChars": 206,
+          "truncated": false
+        },
+        {
+          "name": "USER.md",
+          "path": "/home/one/.openclaw/agents/dev-agent/workspace/USER.md",
+          "missing": false,
+          "rawChars": 421,
+          "injectedChars": 421,
+          "truncated": false
+        }
+      ],
+      "skills": {
+        "promptChars": 8528,
+        "entries": [
+          {
+            "name": "clawhub",
+            "blockChars": 432
+          },
+          {
+            "name": "coding-agent",
+            "blockChars": 832
+          },
+          {
+            "name": "discord",
+            "blockChars": 215
+          },
+          {
+            "name": "gemini",
+            "blockChars": 221
+          },
+          {
+            "name": "healthcheck",
+            "blockChars": 491
+          },
+          {
+            "name": "mcporter",
+            "blockChars": 330
+          },
+          {
+            "name": "node-connect",
+            "blockChars": 541
+          },
+          {
+            "name": "session-logs",
+            "blockChars": 253
+          },
+          {
+            "name": "skill-creator",
+            "blockChars": 759
+          },
+          {
+            "name": "taskflow",
+            "blockChars": 543
+          },
+          {
+            "name": "taskflow-inbox-triage",
+            "blockChars": 418
+          },
+          {
+            "name": "tmux",
+            "blockChars": 255
+          },
+          {
+            "name": "video-frames",
+            "blockChars": 229
+          },
+          {
+            "name": "weather",
+            "blockChars": 416
+          },
+          {
+            "name": "fsrs-memory",
+            "blockChars": 175
+          },
+          {
+            "name": "habit-tracker",
+            "blockChars": 185
+          },
+          {
+            "name": "openclaw-backup-optimized",
+            "blockChars": 539
+          },
+          {
+            "name": "second-brain",
+            "blockChars": 173
+          },
+          {
+            "name": "self-improvement",
+            "blockChars": 633
+          },
+          {
+            "name": "tech-news-digest",
+            "blockChars": 462
+          }
+        ]
+      },
+      "tools": {
+        "listChars": 0,
+        "schemaChars": 23984,
+        "entries": [
+          {
+            "name": "read",
+            "summaryChars": 298,
+            "schemaChars": 304,
+            "propertiesCount": 3
+          },
+          {
+            "name": "edit",
+            "summaryChars": 326,
+            "schemaChars": 834,
+            "propertiesCount": 2
+          },
+          {
+            "name": "write",
+            "summaryChars": 127,
+            "schemaChars": 225,
+            "propertiesCount": 2
+          },
+          {
+            "name": "exec",
+            "summaryChars": 446,
+            "schemaChars": 1098,
+            "propertiesCount": 12
+          },
+          {
+            "name": "process",
+            "summaryChars": 322,
+            "schemaChars": 961,
+            "propertiesCount": 12
+          },
+          {
+            "name": "canvas",
+            "summaryChars": 106,
+            "schemaChars": 661,
+            "propertiesCount": 18
+          },
+          {
+            "name": "message",
+            "summaryChars": 600,
+            "schemaChars": 7284,
+            "propertiesCount": 110
+          },
+          {
+            "name": "tts",
+            "summaryChars": 152,
+            "schemaChars": 223,
+            "propertiesCount": 2
+          },
+          {
+            "name": "image_generate",
+            "summaryChars": 387,
+            "schemaChars": 1195,
+            "propertiesCount": 10
+          },
+          {
+            "name": "video_generate",
+            "summaryChars": 225,
+            "schemaChars": 3734,
+            "propertiesCount": 20
+          },
+          {
+            "name": "sessions_list",
+            "summaryChars": 177,
+            "schemaChars": 212,
+            "propertiesCount": 4
+          },
+          {
+            "name": "sessions_history",
+            "summaryChars": 180,
+            "schemaChars": 161,
+            "propertiesCount": 3
+          },
+          {
+            "name": "sessions_yield",
+            "summaryChars": 97,
+            "schemaChars": 60,
+            "propertiesCount": 1
+          },
+          {
+            "name": "sessions_spawn",
+            "summaryChars": 302,
+            "schemaChars": 1333,
+            "propertiesCount": 18
+          },
+          {
+            "name": "subagents",
+            "summaryChars": 105,
+            "schemaChars": 191,
+            "propertiesCount": 4
+          },
+          {
+            "name": "web_search",
+            "summaryChars": 175,
+            "schemaChars": 1084,
+            "propertiesCount": 9
+          },
+          {
+            "name": "web_fetch",
+            "summaryChars": 129,
+            "schemaChars": 374,
+            "propertiesCount": 3
+          },
+          {
+            "name": "image",
+            "summaryChars": 201,
+            "schemaChars": 342,
+            "propertiesCount": 6
+          },
+          {
+            "name": "pdf",
+            "summaryChars": 275,
+            "schemaChars": 400,
+            "propertiesCount": 6
+          },
+          {
+            "name": "browser",
+            "summaryChars": 1066,
+            "schemaChars": 2799,
+            "propertiesCount": 48
+          },
+          {
+            "name": "memory_search",
+            "summaryChars": 385,
+            "schemaChars": 260,
+            "propertiesCount": 4
+          },
+          {
+            "name": "memory_get",
+            "summaryChars": 207,
+            "schemaChars": 249,
+            "propertiesCount": 4
+          }
+        ]
+      }
+    },
+    "inputTokens": 108293,
+    "outputTokens": 9476,
+    "totalTokens": 60573,
+    "totalTokensFresh": true,
+    "cacheRead": 2077227,
+    "cacheWrite": 0,
+    "estimatedCostUsd": 0
+  },
+  "agent:dev-agent:subagent:adc18397-b768-4da4-820f-adf405132c08": {
+    "sessionId": "14073f5e-c3e5-4ffb-b7c4-fbf35bde48af",
+    "updatedAt": 1776038347505,
+    "spawnDepth": 1,
+    "subagentRole": "orchestrator",
+    "subagentControlScope": "children",
+    "model": "glm-5",
+    "modelProvider": "bailian",
+    "spawnedBy": "agent:main:main",
+    "spawnedWorkspaceDir": "/home/one/.openclaw/agents/dev-agent/workspace",
+    "deliveryContext": {
+      "channel": "telegram",
+      "to": "telegram:6021596770",
+      "accountId": "default"
+    },
+    "lastChannel": "telegram",
+    "lastTo": "telegram:6021596770",
+    "lastAccountId": "default",
+    "channel": "telegram",
+    "skillsSnapshot": {
+      "prompt": "\n\nThe following skills provide specialized instructions for specific tasks.\nUse the read tool to load a skill's file when the task matches its description.\nWhen a skill file references a relative path, resolve it against the skill directory (parent of SKILL.md / dirname of the path) and use that absolute path in tool commands.\n\n<available_skills>\n  <skill>\n    <name>clawhub</name>\n    <description>Use the ClawHub CLI to search, install, update, and publish agent skills from clawhub.com. Use when you need to fetch new skills on the fly, sync installed skills to latest or a specific version, or publish new/updated skill folders with the npm-installed clawhub CLI.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/clawhub/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>coding-agent</name>\n    <description>Delegate coding tasks to Codex, Claude Code, or Pi agents via background process. Use when: (1) building/creating new features or apps, (2) reviewing PRs (spawn in temp dir), (3) refactoring large codebases, (4) iterative coding that needs file exploration. NOT for: simple one-liner fixes (just edit), reading code (use read tool), thread-bound ACP harness requests in chat (for example spawn/run Codex or Claude Code in a Discord thread; use sessions_spawn with runtime:&quot;acp&quot;), or any work in ~/clawd workspace (never spawn agents here). Claude Code: use --print --permission-mode bypassPermissions (no PTY). Codex/Pi/OpenCode: pty:true required.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/coding-agent/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>discord</name>\n    <description>Discord ops via the message tool (channel=discord).</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/discord/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>gemini</name>\n    <description>Gemini CLI for one-shot Q&amp;A, summaries, and generation.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/gemini/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>healthcheck</name>\n    <description>Host security hardening and risk-tolerance configuration for OpenClaw deployments. Use when a user asks for security audits, firewall/SSH/update hardening, risk posture, exposure review, OpenClaw cron scheduling for periodic checks, or version status checks on a machine running OpenClaw (laptop, workstation, Pi, VPS).</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/healthcheck/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>mcporter</name>\n    <description>Use the mcporter CLI to list, configure, auth, and call MCP servers/tools directly (HTTP or stdio), including ad-hoc servers, config edits, and CLI/type generation.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/mcporter/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>node-connect</name>\n    <description>Diagnose OpenClaw node connection and pairing failures for Android, iOS, and macOS companion apps. Use when QR/setup code/manual connect fails, local Wi-Fi works but VPS/tailnet does not, or errors mention pairing required, unauthorized, bootstrap token invalid or expired, gateway.bind, gateway.remote.url, Tailscale, or plugins.entries.device-pair.config.publicUrl.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/node-connect/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>session-logs</name>\n    <description>Search and analyze your own session logs (older/parent conversations) using jq.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/session-logs/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>skill-creator</name>\n    <description>Create, edit, improve, or audit AgentSkills. Use when creating a new skill from scratch or when asked to improve, review, audit, tidy up, or clean up an existing skill or SKILL.md file. Also use when editing or restructuring a skill directory (moving files to references/ or scripts/, removing stale content, validating against the AgentSkills spec). Triggers on phrases like &quot;create a skill&quot;, &quot;author a skill&quot;, &quot;tidy up a skill&quot;, &quot;improve this skill&quot;, &quot;review the skill&quot;, &quot;clean up the skill&quot;, &quot;audit the skill&quot;.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/skill-creator/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>taskflow</name>\n    <description>Use when work should span one or more detached tasks but still behave like one job with a single owner context. TaskFlow is the durable flow substrate under authoring layers like Lobster, ACPX, plugins, or plain code. Keep conditional logic in the caller; use TaskFlow for flow identity, child-task linkage, waiting state, revision-checked mutations, and user-facing emergence.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/taskflow/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>taskflow-inbox-triage</name>\n    <description>Example TaskFlow authoring pattern for inbox triage. Use when messages need different treatment based on intent, with some routes notifying immediately, some waiting on outside answers, and others rolling into a later summary.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/taskflow-inbox-triage/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>tmux</name>\n    <description>Remote-control tmux sessions for interactive CLIs by sending keystrokes and scraping pane output.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/tmux/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>video-frames</name>\n    <description>Extract frames or short clips from videos using ffmpeg.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/video-frames/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>weather</name>\n    <description>Get current weather and forecasts via wttr.in or Open-Meteo. Use when: user asks about weather, temperature, or forecasts for any location. NOT for: historical weather data, severe weather alerts, or detailed meteorological analysis. No API key needed.</description>\n    <location>~/.npm-global/lib/node_modules/openclaw/skills/weather/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>fsrs-memory</name>\n    <description>FSRS 间隔重复记忆系统 - 真正实时 Discord 提醒</description>\n    <location>~/.openclaw/skills/fsrs-memory/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>habit-tracker</name>\n    <description>习惯打卡系统 - 在 Discord 中添加习惯、打卡、统计，支持自动提醒</description>\n    <location>~/.openclaw/skills/habit-tracker/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>openclaw-backup-optimized</name>\n    <description>Optimized OpenClaw backup skill for creating full snapshots with workspace archive splitting, change summaries, restore instructions, and Discord notifications. Use when you need to set up or run automated backups, configure backup cron jobs, or document/restore OpenClaw state. Triggers on backup automation, backup scripts, snapshot/restore, or GitHub backup repos.</description>\n    <location>~/.openclaw/skills/openclaw-backup-optimized/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>second-brain</name>\n    <description>个人知识库管理系统 - 保存笔记、链接、想法、书籍笔记</description>\n    <location>~/.openclaw/skills/second-brain/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>self-improvement</name>\n    <description>Captures learnings, errors, and corrections to enable continuous improvement. Use when: (1) A command or operation fails unexpectedly, (2) User corrects Claude (&apos;No, that&apos;s wrong...&apos;, &apos;Actually...&apos;), (3) User requests a capability that doesn&apos;t exist, (4) An external API or tool fails, (5) Claude realizes its knowledge is outdated or incorrect, (6) A better approach is discovered for a recurring task. Also review learnings before major tasks.</description>\n    <location>~/.openclaw/skills/self-improving-agent/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>tech-news-digest</name>\n    <description>Generate tech news digests with unified source model, quality scoring, and multi-format output. Five-layer data collection from RSS feeds, Twitter/X KOLs, GitHub releases, Reddit, and web search. Pipeline-based scripts with retry mechanisms and deduplication. Supports Discord, email, and markdown templates.</description>\n    <location>~/.openclaw/skills/tech-news-digest/SKILL.md</location>\n  </skill>\n</available_skills>",
+      "skills": [
+        {
+          "name": "clawhub",
+          "requiredEnv": []
+        },
+        {
+          "name": "coding-agent",
+          "requiredEnv": []
+        },
+        {
+          "name": "discord",
+          "requiredEnv": []
+        },
+        {
+          "name": "gemini",
+          "requiredEnv": []
+        },
+        {
+          "name": "healthcheck"
+        },
+        {
+          "name": "mcporter",
+          "requiredEnv": []
+        },
+        {
+          "name": "node-connect"
+        },
+        {
+          "name": "session-logs",
+          "requiredEnv": []
+        },
+        {
+          "name": "skill-creator"
+        },
+        {
+          "name": "taskflow"
+        },
+        {
+          "name": "taskflow-inbox-triage"
+        },
+        {
+          "name": "tmux",
+          "requiredEnv": []
+        },
+        {
+          "name": "video-frames",
+          "requiredEnv": []
+        },
+        {
+          "name": "weather",
+          "requiredEnv": []
+        },
+        {
+          "name": "fsrs-memory",
+          "requiredEnv": []
+        },
+        {
+          "name": "habit-tracker",
+          "requiredEnv": []
+        },
+        {
+          "name": "openclaw-backup-optimized"
+        },
+        {
+          "name": "second-brain",
+          "requiredEnv": []
+        },
+        {
+          "name": "self-improvement"
+        },
+        {
+          "name": "tech-news-digest",
+          "requiredEnv": []
+        }
+      ],
+      "resolvedSkills": [
+        {
+          "name": "clawhub",
+          "description": "Use the ClawHub CLI to search, install, update, and publish agent skills from clawhub.com. Use when you need to fetch new skills on the fly, sync installed skills to latest or a specific version, or publish new/updated skill folders with the npm-installed clawhub CLI.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/clawhub/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/clawhub",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/clawhub/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/clawhub"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "coding-agent",
+          "description": "Delegate coding tasks to Codex, Claude Code, or Pi agents via background process. Use when: (1) building/creating new features or apps, (2) reviewing PRs (spawn in temp dir), (3) refactoring large codebases, (4) iterative coding that needs file exploration. NOT for: simple one-liner fixes (just edit), reading code (use read tool), thread-bound ACP harness requests in chat (for example spawn/run Codex or Claude Code in a Discord thread; use sessions_spawn with runtime:\"acp\"), or any work in ~/clawd workspace (never spawn agents here). Claude Code: use --print --permission-mode bypassPermissions (no PTY). Codex/Pi/OpenCode: pty:true required.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/coding-agent/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/coding-agent",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/coding-agent/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/coding-agent"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "discord",
+          "description": "Discord ops via the message tool (channel=discord).",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/discord/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/discord",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/discord/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/discord"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "gemini",
+          "description": "Gemini CLI for one-shot Q&A, summaries, and generation.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/gemini/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/gemini",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/gemini/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/gemini"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "healthcheck",
+          "description": "Host security hardening and risk-tolerance configuration for OpenClaw deployments. Use when a user asks for security audits, firewall/SSH/update hardening, risk posture, exposure review, OpenClaw cron scheduling for periodic checks, or version status checks on a machine running OpenClaw (laptop, workstation, Pi, VPS).",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/healthcheck/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/healthcheck",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/healthcheck/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/healthcheck"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "mcporter",
+          "description": "Use the mcporter CLI to list, configure, auth, and call MCP servers/tools directly (HTTP or stdio), including ad-hoc servers, config edits, and CLI/type generation.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/mcporter/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/mcporter",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/mcporter/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/mcporter"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "node-connect",
+          "description": "Diagnose OpenClaw node connection and pairing failures for Android, iOS, and macOS companion apps. Use when QR/setup code/manual connect fails, local Wi-Fi works but VPS/tailnet does not, or errors mention pairing required, unauthorized, bootstrap token invalid or expired, gateway.bind, gateway.remote.url, Tailscale, or plugins.entries.device-pair.config.publicUrl.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/node-connect/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/node-connect",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/node-connect/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/node-connect"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "session-logs",
+          "description": "Search and analyze your own session logs (older/parent conversations) using jq.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/session-logs/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/session-logs",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/session-logs/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/session-logs"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "skill-creator",
+          "description": "Create, edit, improve, or audit AgentSkills. Use when creating a new skill from scratch or when asked to improve, review, audit, tidy up, or clean up an existing skill or SKILL.md file. Also use when editing or restructuring a skill directory (moving files to references/ or scripts/, removing stale content, validating against the AgentSkills spec). Triggers on phrases like \"create a skill\", \"author a skill\", \"tidy up a skill\", \"improve this skill\", \"review the skill\", \"clean up the skill\", \"audit the skill\".",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/skill-creator/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/skill-creator",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/skill-creator/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/skill-creator"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "taskflow",
+          "description": "Use when work should span one or more detached tasks but still behave like one job with a single owner context. TaskFlow is the durable flow substrate under authoring layers like Lobster, ACPX, plugins, or plain code. Keep conditional logic in the caller; use TaskFlow for flow identity, child-task linkage, waiting state, revision-checked mutations, and user-facing emergence.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/taskflow/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/taskflow",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/taskflow/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/taskflow"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "taskflow-inbox-triage",
+          "description": "Example TaskFlow authoring pattern for inbox triage. Use when messages need different treatment based on intent, with some routes notifying immediately, some waiting on outside answers, and others rolling into a later summary.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/taskflow-inbox-triage/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/taskflow-inbox-triage",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/taskflow-inbox-triage/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/taskflow-inbox-triage"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "tmux",
+          "description": "Remote-control tmux sessions for interactive CLIs by sending keystrokes and scraping pane output.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/tmux/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/tmux",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/tmux/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/tmux"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "video-frames",
+          "description": "Extract frames or short clips from videos using ffmpeg.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/video-frames/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/video-frames",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/video-frames/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/video-frames"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "weather",
+          "description": "Get current weather and forecasts via wttr.in or Open-Meteo. Use when: user asks about weather, temperature, or forecasts for any location. NOT for: historical weather data, severe weather alerts, or detailed meteorological analysis. No API key needed.",
+          "filePath": "/home/one/.npm-global/lib/node_modules/openclaw/skills/weather/SKILL.md",
+          "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/weather",
+          "source": "openclaw-bundled",
+          "sourceInfo": {
+            "path": "/home/one/.npm-global/lib/node_modules/openclaw/skills/weather/SKILL.md",
+            "source": "openclaw-bundled",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.npm-global/lib/node_modules/openclaw/skills/weather"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "fsrs-memory",
+          "description": "FSRS 间隔重复记忆系统 - 真正实时 Discord 提醒",
+          "filePath": "/home/one/.openclaw/skills/fsrs-memory/SKILL.md",
+          "baseDir": "/home/one/.openclaw/skills/fsrs-memory",
+          "source": "openclaw-managed",
+          "sourceInfo": {
+            "path": "/home/one/.openclaw/skills/fsrs-memory/SKILL.md",
+            "source": "openclaw-managed",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.openclaw/skills/fsrs-memory"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "habit-tracker",
+          "description": "习惯打卡系统 - 在 Discord 中添加习惯、打卡、统计，支持自动提醒",
+          "filePath": "/home/one/.openclaw/skills/habit-tracker/SKILL.md",
+          "baseDir": "/home/one/.openclaw/skills/habit-tracker",
+          "source": "openclaw-managed",
+          "sourceInfo": {
+            "path": "/home/one/.openclaw/skills/habit-tracker/SKILL.md",
+            "source": "openclaw-managed",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.openclaw/skills/habit-tracker"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "openclaw-backup-optimized",
+          "description": "Optimized OpenClaw backup skill for creating full snapshots with workspace archive splitting, change summaries, restore instructions, and Discord notifications. Use when you need to set up or run automated backups, configure backup cron jobs, or document/restore OpenClaw state. Triggers on backup automation, backup scripts, snapshot/restore, or GitHub backup repos.",
+          "filePath": "/home/one/.openclaw/skills/openclaw-backup-optimized/SKILL.md",
+          "baseDir": "/home/one/.openclaw/skills/openclaw-backup-optimized",
+          "source": "openclaw-managed",
+          "sourceInfo": {
+            "path": "/home/one/.openclaw/skills/openclaw-backup-optimized/SKILL.md",
+            "source": "openclaw-managed",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.openclaw/skills/openclaw-backup-optimized"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "second-brain",
+          "description": "个人知识库管理系统 - 保存笔记、链接、想法、书籍笔记",
+          "filePath": "/home/one/.openclaw/skills/second-brain/SKILL.md",
+          "baseDir": "/home/one/.openclaw/skills/second-brain",
+          "source": "openclaw-managed",
+          "sourceInfo": {
+            "path": "/home/one/.openclaw/skills/second-brain/SKILL.md",
+            "source": "openclaw-managed",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.openclaw/skills/second-brain"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "self-improvement",
+          "description": "Captures learnings, errors, and corrections to enable continuous improvement. Use when: (1) A command or operation fails unexpectedly, (2) User corrects Claude ('No, that's wrong...', 'Actually...'), (3) User requests a capability that doesn't exist, (4) An external API or tool fails, (5) Claude realizes its knowledge is outdated or incorrect, (6) A better approach is discovered for a recurring task. Also review learnings before major tasks.",
+          "filePath": "/home/one/.openclaw/skills/self-improving-agent/SKILL.md",
+          "baseDir": "/home/one/.openclaw/skills/self-improving-agent",
+          "source": "openclaw-managed",
+          "sourceInfo": {
+            "path": "/home/one/.openclaw/skills/self-improving-agent/SKILL.md",
+            "source": "openclaw-managed",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.openclaw/skills/self-improving-agent"
+          },
+          "disableModelInvocation": false
+        },
+        {
+          "name": "tech-news-digest",
+          "description": "Generate tech news digests with unified source model, quality scoring, and multi-format output. Five-layer data collection from RSS feeds, Twitter/X KOLs, GitHub releases, Reddit, and web search. Pipeline-based scripts with retry mechanisms and deduplication. Supports Discord, email, and markdown templates.",
+          "filePath": "/home/one/.openclaw/skills/tech-news-digest/SKILL.md",
+          "baseDir": "/home/one/.openclaw/skills/tech-news-digest",
+          "source": "openclaw-managed",
+          "sourceInfo": {
+            "path": "/home/one/.openclaw/skills/tech-news-digest/SKILL.md",
+            "source": "openclaw-managed",
+            "scope": "project",
+            "origin": "top-level",
+            "baseDir": "/home/one/.openclaw/skills/tech-news-digest"
+          },
+          "disableModelInvocation": false
+        }
+      ],
+      "version": 0
+    },
+    "sessionFile": "/home/one/.openclaw/agents/dev-agent/sessions/14073f5e-c3e5-4ffb-b7c4-fbf35bde48af.jsonl",
+    "status": "done",
+    "startedAt": 1776037463871,
+    "abortedLastRun": false,
+    "endedAt": 1776038347475,
+    "runtimeMs": 223579,
+    "compactionCheckpoints": [
+      {
+        "checkpointId": "3df10303-4d2e-41be-a53d-9af296782a20",
+        "sessionKey": "agent:dev-agent:subagent:adc18397-b768-4da4-820f-adf405132c08",
+        "sessionId": "14073f5e-c3e5-4ffb-b7c4-fbf35bde48af",
+        "createdAt": 1776038080050,
+        "reason": "overflow-retry",
+        "tokensBefore": 95825,
+        "tokensAfter": 19967,
+        "summary": "## Decisions\nNo prior history.\n\n## Open TODOs\nNone.\n\n## Constraints/Rules\nNone.\n\n## Pending user asks\nNone.\n\n## Exact identifiers\nNone captured.\n\n**Turn Context (split turn):**\n\n## Goal\nEnable the FE (Finite Element Method) module in yhpde project by:\n1. Analyzing fe module dependencies - which files can be independently enabled\n2. Enabling core fe files: fe_type.cpp, fe_compute_data.cpp, fe_map.cpp\n3. Implementing necessary APIs: FE::shape(), FE::shape_deriv(), FEMap::compute_map()\n4. Validating FEM functionality\n\nSkip: IncompressibleModel, fluid equations (momentumEquation, pressureCorrection), FVM work\n\n## Constraints & Preferences\n- Minimal changes\n- Prefer stub implementations\n- Compile verification after each modification\n- Skip fluid/FVM content entirely\n- Reference: fix_plan.md Phase 1-3, libmesh at /home/one/projects/libmesh\n\n## Progress\n### Done\n- [x] Located project at /home/one/projects/yhpde (build passing)\n- [x] Read fix_plan.md - Phase 7 in progress, Phase 1-6 completed\n- [x] Analyzed fe module structure: src/fe/ has many disabled files\n- [x] Current enabled files: fe_type.cpp, fe_compute_data.cpp, fe_stubs.cpp\n- [x] Identified discrete/fem module has ShapeFun fallback implementations\n- [x] Modified fe_lagrange_shape_1D.cpp:\n  - Changed include from `\"libmesh/fe_lagrange_shape_1D.h\"` to `<yhpde/fe/fe_lagrange_shape_1D.h>`\n  - Added `#include <yhpde/geometry/vertex.h>`\n  - Added stub macro: `#define libmesh_assert(cond) ASSERT0(cond)`\n  - Changed all function signatures from `Point & p` to `Vertex & p`\n\n### In Progress\n- [ ] Fixing coordinate access in fe_lagrange_shape_1D.cpp: need to change `p(0)` to `p.x()` (18 occurrences)\n\n### Blocked\n- fe_map.cpp cannot compile due to:\n  - Type mismatch: header uses `Vertex`, source uses `Point`\n  - Missing ElementBase methods: `print_info`, `on_reference_element`\n  - Missing `YH_PDE::err` stream\n- Edit tool error: multiple identical `p(0)` occurrences need unique context\n\n## Key Decisions\n- **Restore fe_stubs.cpp**: fe_map.cpp too complex to enable directly, keep stubs working\n- **Fix fe_lagrange_shape_1D.cpp incrementally**: simpler file to start with, defines FE<1,LAGRANGE> shape functions\n- **Point vs Vertex**: Point is `Vector<3,Real>`, Vertex inherits from `PointN<YH_PDE_DIM,Real>` - compatible but type mismatch in signatures\n\n## Next Steps\n1. Fix `p(0)` to `p.x()` coordinate access calls in fe_lagrange_shape_1D.cpp (need unique context for each edit)\n2. Try compiling fe_lagrange_shape_1D.cpp by adding it to CMakeLists.txt _separate_src\n3. If successful, proceed to fe_lagrange_shape_2D.cpp and fe_lagrange_shape_3D.cpp\n4. Create minimal fe_map.cpp stub or adapt existing to yhpde types\n\n## Critical Context\n- Project path: `/home/one/projects/yhpde`\n- Build directory: `/home/one/projects/yhpde/build`\n- FE module CMakeLists: `/home/one/projects/yhpde/src/fe/CMakeLists.txt`\n- Current working file: `/home/one/projects/yhpde/src/fe/fe_lagrange_shape_1D.cpp`\n- Header declares `shape(..., const Vertex & p)` - must match source\n- Vertex coordinate access: `p.x()`, `p.y()`, `p.z()` (not `p(0)`)\n- Shape helper functions defined in: `/home/one/projects/yhpde/include/yhpde/fe/fe_lagrange_shape_1D.h`\n\n## Decisions\n- Keep fe_stubs.cpp enabled while attempting to enable real implementations incrementally\n- Start with fe_lagrange_shape_1D.cpp as it's simpler than fe_map.cpp\n\n## Open TODOs\n- Enable fe_lagrange_shape_1D.cpp in build\n- Fix all p(0) → p.x() in fe_lagrange_shape_1D.cpp\n- Enable 2D and 3D Lagrange shape files\n- Create minimal FEMap::compute_map() implementation\n\n## Constraints/Rules\n- Minimal modifications to existing files\n- Stub implementations preferred over complex adaptations\n- Compile verification required after each change\n- Skip fluid/FVM content (IncompressibleModel, momentumEquation, pressureCorrection)\n\n## Pending user asks\n- Enable fe module core files\n- Implement FE::shape(), FE::shape_deriv(), FEMap::compute_map() APIs\n- Validate FEM functionality (reference ex_300 series examples)\n\n## Exact identifiers\n- `/home/one/projects/yhpde` - main project\n- `/home/one/projects/libmesh` - reference implementation\n- `/home/one/projects/yhpde/src/fe/CMakeLists.txt` - build configuration\n- `/home/one/projects/yhpde/src/fe/fe_lagrange_shape_1D.cpp` - current edit target\n- `/home/one/projects/yhpde/include/yhpde/fe/fe_lagrange_shape_1D.h` - helper header\n- `FE<1, LAGRANGE>::shape()` - function template being fixed\n- `FE<1, L2_LAGRANGE>::shape()` - related template\n- `fe_lagrange_1D_shape()` - helper function from header\n- `YH_PDE_DEFAULT_VECTORIZED_FE(1, LAGRANGE)` - macro instantiation\n\n<read-files>\n/home/one/.openclaw/agents/dev-agent/workspace/MEMORY.md\n/home/one/projects/libmesh/src/fe/fe_map.C\n/home/one/projects/yhpde/examples/ex_303/ex_303.cpp\n/home/one/projects/yhpde/examples/ex_303/ex_303_framework.cpp\n/home/one/projects/yhpde/fix_plan.md\n/home/one/projects/yhpde/include/yhpde/base/libmesh_shim.h\n/home/one/projects/yhpde/include/yhpde/discrete/fem/fe/ShapeFun.h\n/home/one/projects/yhpde/include/yhpde/fe/fe.h\n/home/one/projects/yhpde/include/yhpde/fe/fe_lagrange_shape_1D.h\n/home/one/projects/yhpde/include/yhpde/fe/fe_macro.h\n/home/one/projects/yhpde/include/yhpde/fe/fe_map.h\n/home/one/projects/yhpde/include/yhpde/geometry/vertex.h\n/home/one/projects/yhpde/include/yhpde/linSystem/point.h\n/home/one/projects/yhpde/include/yhpde/linSystem/vector.h\n/home/one/projects/yhpde/src/discrete/fem/CMakeLists.txt\n...and 11 more\n\n</read-files>\n\n<modified-files>\n/home/one/projects/yhpde/src/fe/CMakeLists.txt\n/home/one/projects/yhpde/src/fe/fe_lagrange_shape_1D.cpp\n\n</modified-files>",
+        "firstKeptEntryId": "82532504",
+        "preCompaction": {
+          "sessionId": "14073f5e-c3e5-4ffb-b7c4-fbf35bde48af",
+          "sessionFile": "/home/one/.openclaw/agents/dev-agent/sessions/14073f5e-c3e5-4ffb-b7c4-fbf35bde48af.checkpoint.18953d1d-d34a-4b42-b0b2-bffe8ff2c3d4.jsonl",
+          "leafId": "addd601d"
+        },
+        "postCompaction": {
+          "sessionId": "14073f5e-c3e5-4ffb-b7c4-fbf35bde48af",
+          "sessionFile": "/home/one/.openclaw/agents/dev-agent/sessions/14073f5e-c3e5-4ffb-b7c4-fbf35bde48af.jsonl",
+          "leafId": "4ef1cec3",
+          "entryId": "4ef1cec3"
+        }
+      }
+    ],
+    "contextTokens": 202752,
+    "systemPromptReport": {
+      "source": "run",
+      "generatedAt": 1776038123872,
+      "sessionId": "14073f5e-c3e5-4ffb-b7c4-fbf35bde48af",
+      "sessionKey": "agent:dev-agent:subagent:adc18397-b768-4da4-820f-adf405132c08",
+      "provider": "bailian",
+      "model": "glm-5",
+      "workspaceDir": "/home/one/.openclaw/agents/dev-agent/workspace",
+      "bootstrapMaxChars": 20000,
+      "bootstrapTotalMaxChars": 150000,
+      "bootstrapTruncation": {
+        "warningMode": "once",
+        "warningShown": false,
+        "truncatedFiles": 0,
+        "nearLimitFiles": 0,
+        "totalNearLimit": false
+      },
+      "sandbox": {
+        "mode": "off",
+        "sandboxed": false
+      },
+      "systemPrompt": {
+        "chars": 25014,
+        "projectContextChars": 10573,
+        "nonProjectContextChars": 14441
+      },
+      "injectedWorkspaceFiles": [
+        {
+          "name": "AGENTS.md",
+          "path": "/home/one/.openclaw/agents/dev-agent/workspace/AGENTS.md",
+          "missing": false,
+          "rawChars": 2304,
+          "injectedChars": 2304,
+          "truncated": false
+        },
+        {
+          "name": "SOUL.md",
+          "path": "/home/one/.openclaw/agents/dev-agent/workspace/SOUL.md",
+          "missing": false,
+          "rawChars": 2293,
+          "injectedChars": 2293,
+          "truncated": false
+        },
+        {
+          "name": "TOOLS.md",
+          "path": "/home/one/.openclaw/agents/dev-agent/workspace/TOOLS.md",
+          "missing": false,
+          "rawChars": 469,
+          "injectedChars": 469,
+          "truncated": false
+        },
+        {
+          "name": "IDENTITY.md",
+          "path": "/home/one/.openclaw/agents/dev-agent/workspace/IDENTITY.md",
+          "missing": false,
+          "rawChars": 206,
+          "injectedChars": 206,
+          "truncated": false
+        },
+        {
+          "name": "USER.md",
+          "path": "/home/one/.openclaw/agents/dev-agent/workspace/USER.md",
+          "missing": false,
+          "rawChars": 421,
+          "injectedChars": 421,
+          "truncated": false
+        }
+      ],
+      "skills": {
+        "promptChars": 8528,
+        "entries": [
+          {
+            "name": "clawhub",
+            "blockChars": 432
+          },
+          {
+            "name": "coding-agent",
+            "blockChars": 832
+          },
+          {
+            "name": "discord",
+            "blockChars": 215
+          },
+          {
+            "name": "gemini",
+            "blockChars": 221
+          },
+          {
+            "name": "healthcheck",
+            "blockChars": 491
+          },
+          {
+            "name": "mcporter",
+            "blockChars": 330
+          },
+          {
+            "name": "node-connect",
+            "blockChars": 541
+          },
+          {
+            "name": "session-logs",
+            "blockChars": 253
+          },
+          {
+            "name": "skill-creator",
+            "blockChars": 759
+          },
+          {
+            "name": "taskflow",
+            "blockChars": 543
+          },
+          {
+            "name": "taskflow-inbox-triage",
+            "blockChars": 418
+          },
+          {
+            "name": "tmux",
+            "blockChars": 255
+          },
+          {
+            "name": "video-frames",
+            "blockChars": 229
+          },
+          {
+            "name": "weather",
+            "blockChars": 416
+          },
+          {
+            "name": "fsrs-memory",
+            "blockChars": 175
+          },
+          {
+            "name": "habit-tracker",
+            "blockChars": 185
+          },
+          {
+            "name": "openclaw-backup-optimized",
+            "blockChars": 539
+          },
+          {
+            "name": "second-brain",
+            "blockChars": 173
+          },
+          {
+            "name": "self-improvement",
+            "blockChars": 633
+          },
+          {
+            "name": "tech-news-digest",
+            "blockChars": 462
+          }
+        ]
+      },
+      "tools": {
+        "listChars": 0,
+        "schemaChars": 23984,
+        "entries": [
+          {
+            "name": "read",
+            "summaryChars": 298,
+            "schemaChars": 304,
+            "propertiesCount": 3
+          },
+          {
+            "name": "edit",
+            "summaryChars": 326,
+            "schemaChars": 834,
+            "propertiesCount": 2
+          },
+          {
+            "name": "write",
+            "summaryChars": 127,
+            "schemaChars": 225,
+            "propertiesCount": 2
+          },
+          {
+            "name": "exec",
+            "summaryChars": 446,
+            "schemaChars": 1098,
+            "propertiesCount": 12
+          },
+          {
+            "name": "process",
+            "summaryChars": 322,
+            "schemaChars": 961,
+            "propertiesCount": 12
+          },
+          {
+            "name": "canvas",
+            "summaryChars": 106,
+            "schemaChars": 661,
+            "propertiesCount": 18
+          },
+          {
+            "name": "message",
+            "summaryChars": 600,
+            "schemaChars": 7284,
+            "propertiesCount": 110
+          },
+          {
+            "name": "tts",
+            "summaryChars": 152,
+            "schemaChars": 223,
+            "propertiesCount": 2
+          },
+          {
+            "name": "image_generate",
+            "summaryChars": 387,
+            "schemaChars": 1195,
+            "propertiesCount": 10
+          },
+          {
+            "name": "video_generate",
+            "summaryChars": 225,
+            "schemaChars": 3734,
+            "propertiesCount": 20
+          },
+          {
+            "name": "sessions_list",
+            "summaryChars": 177,
+            "schemaChars": 212,
+            "propertiesCount": 4
+          },
+          {
+            "name": "sessions_history",
+            "summaryChars": 180,
+            "schemaChars": 161,
+            "propertiesCount": 3
+          },
+          {
+            "name": "sessions_yield",
+            "summaryChars": 97,
+            "schemaChars": 60,
+            "propertiesCount": 1
+          },
+          {
+            "name": "sessions_spawn",
+            "summaryChars": 302,
+            "schemaChars": 1333,
+            "propertiesCount": 18
+          },
+          {
+            "name": "subagents",
+            "summaryChars": 105,
+            "schemaChars": 191,
+            "propertiesCount": 4
+          },
+          {
+            "name": "web_search",
+            "summaryChars": 175,
+            "schemaChars": 1084,
+            "propertiesCount": 9
+          },
+          {
+            "name": "web_fetch",
+            "summaryChars": 129,
+            "schemaChars": 374,
+            "propertiesCount": 3
+          },
+          {
+            "name": "image",
+            "summaryChars": 201,
+            "schemaChars": 342,
+            "propertiesCount": 6
+          },
+          {
+            "name": "pdf",
+            "summaryChars": 275,
+            "schemaChars": 400,
+            "propertiesCount": 6
+          },
+          {
+            "name": "browser",
+            "summaryChars": 1066,
+            "schemaChars": 2799,
+            "propertiesCount": 48
+          },
+          {
+            "name": "memory_search",
+            "summaryChars": 385,
+            "schemaChars": 260,
+            "propertiesCount": 4
+          },
+          {
+            "name": "memory_get",
+            "summaryChars": 207,
+            "schemaChars": 249,
+            "propertiesCount": 4
+          }
+        ]
+      }
+    },
+    "inputTokens": 252012,
+    "outputTokens": 29101,
+    "totalTokens": 50055,
+    "totalTokensFresh": true,
+    "cacheRead": 4306439,
+    "cacheWrite": 0,
+    "estimatedCostUsd": 0,
+    "compactionCount": 1
+  }
+}

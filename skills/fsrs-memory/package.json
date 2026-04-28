@@ -1,0 +1,22 @@
+{
+  "name": "fsrs-memory",
+  "version": "1.0.0",
+  "description": "当用户在 Discord 发送消息时，使用以下 handler 处理：",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "adm-zip": "^0.5.16",
+    "apkg-reader": "^1.1.0",
+    "better-sqlite3": "^12.6.2",
+    "fsrs.js": "^1.2.2",
+    "https-proxy-agent": "^7.0.6",
+    "jszip": "^3.10.1",
+    "multer": "^2.0.2",
+    "ts-fsrs": "^5.2.3"
+  }
+}

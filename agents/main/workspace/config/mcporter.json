@@ -1,0 +1,36 @@
+{
+  "mcpServers": {
+    "github": {
+      "description": "GitHub MCP Server (local)",
+      "command": "/home/one/.local/bin/github-mcp-server",
+      "args": [
+        "stdio"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "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"
+      }
+    },
+    "tavily": {
+      "description": "Tavily Search MCP Server - AI optimized web search",
+      "command": "npx",
+      "args": [
+        "-y",
+        "tavily-mcp"
+      ],
+      "env": {
+        "TAVILY_API_KEY": "${TAVILY_API_KEY}"
+      }
+    },
+    "zhipu-web-search": {
+      "baseUrl": "https://open.bigmodel.cn/api/mcp-broker/proxy/web-search/mcp",
+      "headers": {
+        "Authorization": "${ZHIPU_API_TOKEN}"
+      }
+    },
+    "tiddlywiki": {
+      "description": "TiddlyWiki MCP Server",
+      "baseUrl": "http://localhost:3100/mcp"
+    }
+  },
+  "imports": []
+}

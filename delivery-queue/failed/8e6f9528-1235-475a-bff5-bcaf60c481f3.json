@@ -1,0 +1,20 @@
+{
+  "id": "8e6f9528-1235-475a-bff5-bcaf60c481f3",
+  "enqueuedAt": 1772550000941,
+  "channel": "discord",
+  "to": "heartbeat",
+  "payloads": [
+    {
+      "text": "**服务监控检查完成**\n\n- **habit-daemon**: ✅ 运行中 (PID: 3209)\n- **检查时间**: 22:59 (Asia/Shanghai)\n\n所有服务正常运行，无需干预。"
+    }
+  ],
+  "threadId": null,
+  "mirror": {
+    "sessionKey": "agent:main:discord:channel:heartbeat",
+    "agentId": "main",
+    "text": "**服务监控检查完成**\n\n- **habit-daemon**: ✅ 运行中 (PID: 3209)\n- **检查时间**: 22:59 (Asia/Shanghai)\n\n所有服务正常运行，无需干预。"
+  },
+  "retryCount": 5,
+  "lastAttemptAt": 1772585094562,
+  "lastError": "fetch failed"
+}

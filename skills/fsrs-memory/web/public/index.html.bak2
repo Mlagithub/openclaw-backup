@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FSRS Memory - 智能记忆卡片</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  
+  <!-- Custom Config -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              200: '#bfdbfe',
+              300: '#93c5fd',
+              400: '#60a5fa',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    .card-flip { perspective: 1000px; }
+    .card-inner { transition: transform 0.6s; transform-style: preserve-3d; }
+    .card-flipped .card-inner { transform: rotateY(180deg); }
+    .card-front, .card-back { backface-visibility: hidden; }
+    .card-back { transform: rotateY(180deg); }
+    .fade-in { animation: fadeIn 0.3s ease-in; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .dark ::-webkit-scrollbar-thumb { background: #475569; }
+    .mobile-menu { display: none; }
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); position: fixed; z-index: 50; transition: transform 0.3s ease; }
+      .sidebar.open { transform: translateX(0); }
+      .mobile-menu { display: flex; }
+      .main-content { margin-left: 0 !important; }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-200">
+  <div id="app" class="flex h-screen overflow-hidden">
+    
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu fixed top-4 left-4 z-50 p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700" onclick="toggleMobileMenu()">
+      <i class="ph ph-list text-2xl"></i>
+    </button>
+    
+    <!-- Sidebar -->
+    <aside class="sidebar w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300">
+      <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex items-center gap-3">
+          <i class="ph ph-brain text-3xl text-primary-600"></i>
+          <h1 class="text-xl font-bold">FSRS Memory</h1>
+        </div>
+      </div>
+      
+      <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+        <button class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" data-view="study">
+          <i class="ph ph-book-open text-xl"></i>
+          <span>学习</span>
+          <span class="ml-auto badge bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 px-2 py-0.5 rounded-full text-xs font-medium" id="due-badge">0</span>
+        </button>
+        <button class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" data-view="cards">
+          <i class="ph ph-cards text-xl"></i>
+          <span>卡片</span>
+        </button>
+        <button class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" data-view="decks">
+          <i class="ph ph-folder-open text-xl"></i>
+          <span>牌组</span>
+        </button>
+        <button class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" data-view="add">
+          <i class="ph ph-plus-circle text-xl"></i>
+          <span>添加</span>
+        </button>
+        <button class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" data-view="import">
+          <i class="ph ph-download-simple text-xl"></i>
+          <span>导入</span>
+        </button>
+        <button class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" data-view="stats">
+          <i class="ph ph-chart-bar text-xl"></i>
+          <span>统计</span>
+        </button>
+      </nav>
+      
+      <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+        <div class="grid grid-cols-2 gap-2">
+          <div class="text-center p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <div class="text-lg font-bold text-primary-600" id="total-cards">0</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400">总卡片</div>
+          </div>
+          <div class="text-center p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <div class="text-lg font-bold text-orange-600" id="due-cards">0</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400">待复习</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+        <button id="theme-toggle-btn" onclick="toggleTheme()" class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+          <i class="ph ph-moon text-lg" id="theme-icon"></i>
+          <span id="theme-text">暗色模式</span>
+        </button>
+      </div>
+    </aside>
+    
+    <main class="main-content flex-1 overflow-y-auto ml-64 transition-all duration-300">
+      <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-2xl font-bold" id="page-title">今日学习</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1" id="page-subtitle">开始你的复习之旅</p>
+          </div>
+          <div class="flex items-center gap-4">
+            <select id="deck-select" onchange="changeDeck(this.value)" class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500">
+              <option value="">全部牌组</option>
+            </select>
+          </div>
+        </div>
+      </header>
+      
+      <div class="p-6">
+        <!-- Study View -->
+        <section id="study-view" class="view active fade-in">
+          <div class="max-w-2xl mx-auto">
+            <div class="mb-6 flex items-center justify-between">
+              <div class="text-sm text-gray-500 dark:text-gray-400">进度：<span id="study-progress" class="font-medium">0 / 0</span></div>
+              <span class="text-xs px-2 py-1 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded">快捷键：1-5</span>
+            </div>
+            <div class="card-flip mb-6" id="card-flip-area">
+              <div class="card-inner relative bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 min-h-[400px] cursor-pointer" onclick="toggleCardFlip()">
+                <div class="card-front absolute inset-0 p-8 flex flex-col">
+                  <div class="flex-1 flex items-center justify-center">
+                    <div class="text-center">
+                      <div class="text-sm text-gray-500 dark:text-gray-400 mb-4">问题</div>
+                      <div class="text-2xl font-medium" id="question-text">加载中...</div>
+                    </div>
+                  </div>
+                  <div class="text-center">
+                    <button class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors" onclick="event.stopPropagation(); showAnswer()">显示答案</button>
+                  </div>
+                </div>
+                <div class="card-back absolute inset-0 p-8 flex flex-col">
+                  <div class="flex-1 flex items-center justify-center">
+                    <div class="text-center">
+                      <div class="text-sm text-gray-500 dark:text-gray-400 mb-4">答案</div>
+                      <div class="text-2xl font-medium" id="answer-text">加载中...</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="grid grid-cols-5 gap-2" id="rating-buttons" style="display: none;">
+              <button class="rating-btn px-4 py-3 rounded-lg border-2 border-red-200 dark:border-red-900 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors" onclick="rateCard(1)">
+                <div class="text-sm font-medium text-red-600 dark:text-red-400">Again</div>
+                <div class="text-xs text-gray-500" id="interval-1">1m</div>
+              </button>
+              <button class="rating-btn px-4 py-3 rounded-lg border-2 border-orange-200 dark:border-orange-900 hover:bg-orange-50 dark:hover:bg-orange-900/30 transition-colors" onclick="rateCard(2)">
+                <div class="text-sm font-medium text-orange-600 dark:text-orange-400">Hard</div>
+                <div class="text-xs text-gray-500" id="interval-2">10m</div>
+              </button>
+              <button class="rating-btn px-4 py-3 rounded-lg border-2 border-blue-200 dark:border-blue-900 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors" onclick="rateCard(3)">
+                <div class="text-sm font-medium text-blue-600 dark:text-blue-400">Good</div>
+                <div class="text-xs text-gray-500" id="interval-3">1d</div>
+              </button>
+              <button class="rating-btn px-4 py-3 rounded-lg border-2 border-green-200 dark:border-green-900 hover:bg-green-50 dark:hover:bg-green-900/30 transition-colors" onclick="rateCard(4)">
+                <div class="text-sm font-medium text-green-600 dark:text-green-400">Easy</div>
+                <div class="text-xs text-gray-500" id="interval-4">4d</div>
+              </button>
+              <button class="rating-btn px-4 py-3 rounded-lg border-2 border-purple-200 dark:border-purple-900 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-colors" onclick="rateCard(5)">
+                <div class="text-sm font-medium text-purple-600 dark:text-purple-400">Perfect</div>
+                <div class="text-xs text-gray-500" id="interval-5">10d</div>
+              </button>
+            </div>
+            <div class="empty-state text-center py-16" id="no-cards-message" style="display: none;">
+              <i class="ph ph-check-circle text-6xl text-green-500 mb-4"></i>
+              <h3 class="text-2xl font-bold mb-2">太棒了！</h3>
+              <p class="text-gray-500 dark:text-gray-400 mb-6">今天没有需要复习的卡片了</p>
+              <button class="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors" onclick="showView('add')">添加新卡片</button>
+            </div>
+          </div>
+        </section>
+        
+        <!-- Cards View -->
+        <section id="cards-view" class="view fade-in" style="display: none;">
+          <div class="view-header flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold">所有卡片</h1>
+            <input type="text" id="card-search" placeholder="搜索卡片..." oninput="filterCards()" class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 w-64">
+          </div>
+          <div class="cards-list space-y-3" id="cards-list"></div>
+        </section>
+
+        <!-- Decks View -->
+        <section id="decks-view" class="view fade-in" style="display: none;">
+          <div class="view-header flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold">牌组管理</h1>
+            <button class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors" onclick="showCreateDeckModal()">
+              <i class="ph ph-plus mr-2"></i>新建牌组
+            </button>
+          </div>
+          <div class="decks-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="decks-grid"></div>
+        </section>
+
+        <!-- Add View -->
+        <section id="add-view" class="view fade-in" style="display: none;">
+          <div class="view-header mb-6"><h1 class="text-2xl font-bold">添加卡片</h1></div>
+          <div class="add-form max-w-2xl">
+            <div class="form-group mb-6">
+              <label for="deck-select-add" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">选择牌组</label>
+              <select id="deck-select-add" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500"></select>
+            </div>
+            <div class="form-group mb-6">
+              <label for="question-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">问题</label>
+              <textarea id="question-input" placeholder="输入问题..." rows="3" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500"></textarea>
+            </div>
+            <div class="form-group mb-6">
+              <label for="answer-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">答案</label>
+              <textarea id="answer-input" placeholder="输入答案..." rows="5" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500"></textarea>
+            </div>
+            <button class="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors" onclick="addCard()">添加卡片</button>
+            <div class="quick-add mt-10 pt-10 border-t border-gray-200 dark:border-gray-700">
+              <h3 class="text-lg font-medium mb-4">快速添加 (格式：问题::答案)</h3>
+              <textarea id="quick-add-input" placeholder="每行一个卡片，格式：问题::答案" rows="5" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 mb-4"></textarea>
+              <button class="px-4 py-2 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors" onclick="quickAdd()">批量添加</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Import View -->
+        <section id="import-view" class="view fade-in" style="display: none;">
+          <div class="view-header mb-6"><h1 class="text-2xl font-bold">导入 ANKI 卡包</h1></div>
+          <div class="import-form max-w-2xl">
+            <div class="import-description bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 border-l-4 border-primary-600">
+              <p class="font-semibold mb-3">📦 导入 .apkg 格式的 Anki 卡包文件</p>
+              <ul class="list-disc list-inside text-gray-600 dark:text-gray-400 space-y-1">
+                <li>支持所有标准 .apkg 文件</li>
+                <li>自动保留卡片内容和字段</li>
+                <li>可选择导入到指定牌组</li>
+              </ul>
+            </div>
+            <div class="form-group mb-6">
+              <label for="import-deck-select" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">导入到牌组</label>
+              <select id="import-deck-select" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                <option value="1">默认牌组</option>
+              </select>
+            </div>
+            <div class="form-group mb-6">
+              <label for="apkg-file" class="file-label flex items-center gap-3 p-5 bg-white dark:bg-gray-800 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-primary-500 transition-colors">
+                <i class="ph ph-folder text-3xl"></i>
+                <span class="text-gray-600 dark:text-gray-400">选择 .apkg 文件</span>
+              </label>
+              <input type="file" id="apkg-file" accept=".apkg" style="display: none;" onchange="onFileSelected()">
+              <div id="file-info" class="file-info mt-3 p-3 bg-white dark:bg-gray-800 rounded-lg flex gap-4 text-sm" style="display: none;">
+                <span id="file-name" class="font-medium"></span>
+                <span id="file-size" class="text-gray-500"></span>
+              </div>
+            </div>
+            <div id="preview-area" class="preview-area mt-6 p-5 bg-white dark:bg-gray-800 rounded-lg" style="display: none;">
+              <h3 class="font-semibold mb-4">📋 卡包预览</h3>
+              <div class="preview-stats grid grid-cols-3 gap-4 mb-4">
+                <div class="preview-stat text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <span class="preview-stat-value text-3xl font-bold text-primary-600" id="preview-cards">0</span>
+                  <span class="preview-stat-label text-xs text-gray-500 dark:text-gray-400 block mt-1">卡片数</span>
+                </div>
+                <div class="preview-stat text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <span class="preview-stat-value text-3xl font-bold text-primary-600" id="preview-decks">0</span>
+                  <span class="preview-stat-label text-xs text-gray-500 dark:text-gray-400 block mt-1">牌组数</span>
+                </div>
+                <div class="preview-stat text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <span class="preview-stat-value text-3xl font-bold text-primary-600" id="preview-models">0</span>
+                  <span class="preview-stat-label text-xs text-gray-500 dark:text-gray-400 block mt-1">模型数</span>
+                </div>
+              </div>
+              <div id="preview-details" class="preview-details mt-4"></div>
+            </div>
+            <button class="btn btn-primary btn-large w-full px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors" id="import-btn" onclick="importAPKG()" disabled>📥 开始导入</button>
+            <div id="import-progress" class="import-progress mt-6" style="display: none;">
+              <div class="progress-bar h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mb-3">
+                <div class="progress-fill h-full bg-gradient-to-r from-primary-500 to-primary-400 w-0 transition-all duration-300" id="progress-fill"></div>
+              </div>
+              <p class="text-center text-gray-600 dark:text-gray-400 text-sm" id="progress-text">正在导入...</p>
+            </div>
+            <div id="import-result" class="import-result mt-6 p-6 rounded-lg text-center" style="display: none;"></div>
+          </div>
+        </section>
+
+        <!-- Stats View -->
+        <section id="stats-view" class="view fade-in" style="display: none;">
+          <div class="view-header mb-6"><h1 class="text-2xl font-bold">学习统计</h1></div>
+          <div class="stats-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+            <div class="stat-card bg-white dark:bg-gray-800 rounded-xl p-6 text-center border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
+              <div class="stat-icon text-4xl mb-3">📚</div>
+              <div class="stat-number text-4xl font-bold text-primary-600" id="stat-total">0</div>
+              <div class="stat-title text-sm text-gray-500 dark:text-gray-400 mt-2">总卡片数</div>
+            </div>
+            <div class="stat-card stat-due bg-white dark:bg-gray-800 rounded-xl p-6 text-center border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
+              <div class="stat-icon text-4xl mb-3">⏰</div>
+              <div class="stat-number text-4xl font-bold text-orange-600" id="stat-due">0</div>
+              <div class="stat-title text-sm text-gray-500 dark:text-gray-400 mt-2">待复习</div>
+            </div>
+            <div class="stat-card stat-done bg-white dark:bg-gray-800 rounded-xl p-6 text-center border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
+              <div class="stat-icon text-4xl mb-3">✅</div>
+              <div class="stat-number text-4xl font-bold text-green-600" id="stat-reviewed">0</div>
+              <div class="stat-title text-sm text-gray-500 dark:text-gray-400 mt-2">已复习</div>
+            </div>
+            <div class="stat-card bg-white dark:bg-gray-800 rounded-xl p-6 text-center border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
+              <div class="stat-icon text-4xl mb-3">🆕</div>
+              <div class="stat-number text-4xl font-bold text-blue-600" id="stat-new">0</div>
+              <div class="stat-title text-sm text-gray-500 dark:text-gray-400 mt-2">新卡片</div>
+            </div>
+            <div class="stat-card bg-white dark:bg-gray-800 rounded-xl p-6 text-center border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
+              <div class="stat-icon text-4xl mb-3">📈</div>
+              <div class="stat-number text-4xl font-bold text-yellow-600" id="stat-learning">0</div>
+              <div class="stat-title text-sm text-gray-500 dark:text-gray-400 mt-2">学习中</div>
+            </div>
+            <div class="stat-card bg-white dark:bg-gray-800 rounded-xl p-6 text-center border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
+              <div class="stat-icon text-4xl mb-3">🎯</div>
+              <div class="stat-number text-4xl font-bold text-purple-600" id="stat-ease">2.5</div>
+              <div class="stat-title text-sm text-gray-500 dark:text-gray-400 mt-2">平均难度</div>
+            </div>
+          </div>
+          <div class="stats-chart bg-white dark:bg-gray-800 rounded-xl p-8 border border-gray-200 dark:border-gray-700">
+            <h3 class="text-lg font-semibold mb-6">学习进度</h3>
+            <div class="progress-bar h-8 rounded-full overflow-hidden flex bg-gray-200 dark:bg-gray-700">
+              <div class="progress-segment h-full bg-blue-500 transition-all duration-500" id="progress-new" style="width: 0%"></div>
+              <div class="progress-segment h-full bg-yellow-500 transition-all duration-500" id="progress-learning" style="width: 0%"></div>
+              <div class="progress-segment h-full bg-green-500 transition-all duration-500" id="progress-review" style="width: 0%"></div>
+            </div>
+            <div class="progress-legend flex justify-center gap-6 mt-4 text-sm text-gray-600 dark:text-gray-400">
+              <span class="flex items-center"><span class="legend-dot w-3 h-3 rounded-full bg-blue-500 mr-2"></span> 新卡片</span>
+              <span class="flex items-center"><span class="legend-dot w-3 h-3 rounded-full bg-yellow-500 mr-2"></span> 学习</span>
+              <span class="flex items-center"><span class="legend-dot w-3 h-3 rounded-full bg-green-500 mr-2"></span> 复习</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Delete Modal -->
+  <div class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" id="delete-modal" style="display: none;">
+    <div class="modal-content bg-white dark:bg-gray-800 rounded-xl p-8 max-w-md w-full mx-4">
+      <h3 class="text-xl font-bold mb-4">确认删除</h3>
+      <p class="text-gray-600 dark:text-gray-400 mb-6">确定要删除这张卡片吗？此操作无法撤销。</p>
+      <div class="modal-actions flex gap-3 justify-end">
+        <button class="px-4 py-2 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors" onclick="closeModal()">取消</button>
+        <button class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors" id="confirm-delete-btn">删除</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Deck Modal -->
+  <div class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" id="deck-modal" style="display: none;">
+    <div class="modal-content bg-white dark:bg-gray-800 rounded-xl p-8 max-w-md w-full mx-4">
+      <h3 class="text-xl font-bold mb-4" id="deck-modal-title">新建牌组</h3>
+      <div class="form-group mb-4">
+        <label for="deck-name-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">牌组名称</label>
+        <input type="text" id="deck-name-input" placeholder="输入牌组名称..." class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500">
+      </div>
+      <div class="form-group mb-6">
+        <label for="deck-desc-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">描述（可选）</label>
+        <textarea id="deck-desc-input" placeholder="输入牌组描述..." rows="2" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500"></textarea>
+      </div>
+      <div class="modal-actions flex gap-3 justify-end">
+        <button class="px-4 py-2 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors" onclick="closeDeckModal()">取消</button>
+        <button class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors" id="save-deck-btn">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast fixed bottom-6 right-6 px-6 py-4 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700" id="toast"></div>
+
+  <script src="app-v2.js"></script>
+</body>
+</html>

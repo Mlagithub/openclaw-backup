@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FSRS Memory - 间隔重复学习</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">
+        <span class="logo-icon">🧠</span>
+        <span class="logo-text">FSRS Memory</span>
+      </div>
+      
+      <!-- Theme Toggle -->
+      <div class="theme-toggle">
+        <button class="theme-btn" id="theme-toggle-btn" onclick="toggleTheme()">
+          <span id="theme-icon">🌙</span>
+          <span id="theme-text">切换主题</span>
+        </button>
+      </div>
+      
+      <!-- Deck Selector -->
+      <div class="deck-selector">
+        <div class="deck-selector-label">当前牌组</div>
+        <select class="deck-select" id="deck-select" onchange="changeDeck(this.value)">
+          <option value="">全部牌组</option>
+        </select>
+      </div>
+      
+      <nav class="nav-menu">
+        <button class="nav-item active" data-view="study">
+          <span class="nav-icon">📖</span>
+          <span>学习</span>
+          <span class="badge" id="due-badge">0</span>
+        </button>
+        <button class="nav-item" data-view="cards">
+          <span class="nav-icon">📚</span>
+          <span>卡片</span>
+        </button>
+        <button class="nav-item" data-view="decks">
+          <span class="nav-icon">🗂️</span>
+          <span>牌组</span>
+        </button>
+        <button class="nav-item" data-view="add">
+          <span class="nav-icon">➕</span>
+          <span>添加</span>
+        </button>
+        <button class="nav-item" data-view="import">
+          <span class="nav-icon">📥</span>
+          <span>导入</span>
+        </button>
+        <button class="nav-item" data-view="stats">
+          <span class="nav-icon">📊</span>
+          <span>统计</span>
+        </button>
+      </nav>
+      
+      <div class="sidebar-stats">
+        <div class="stat-item">
+          <span class="stat-value" id="total-cards">0</span>
+          <span class="stat-label">总卡片</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value" id="due-cards">0</span>
+          <span class="stat-label">待复习</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Study View -->
+      <section id="study-view" class="view active">
+        <div class="study-header">
+          <h1>今日复习</h1>
+          <div class="study-progress">
+            <span id="study-progress">0 / 0</span>
+          </div>
+        </div>
+        
+        <div class="deck-info" id="deck-info"></div>
+        
+        <div class="study-container" id="study-container">
+          <!-- Card will be loaded here -->
+          <div class="empty-state" id="no-cards-message">
+            <div class="empty-icon">🎉</div>
+            <h2>太棒了！</h2>
+            <p>今天没有需要复习的卡片了</p>
+            <button class="btn btn-primary" onclick="showView('add')">添加新卡片</button>
+          </div>
+          
+          <div class="card-area" id="card-area" style="display: none;">
+            <div class="card">
+              <div class="card-header">
+                <span class="card-id">#<span id="card-id">0</span></span>
+                <span class="card-state" id="card-state">new</span>
+              </div>
+              <div class="card-content">
+                <div class="card-front" id="card-front">
+                  <div class="card-label">问题</div>
+                  <div class="card-text" id="question-text">加载中...</div>
+                </div>
+                <div class="card-back" id="card-back" style="display: none;">
+                  <div class="card-label">答案</div>
+                  <div class="card-text" id="answer-text">加载中...</div>
+                </div>
+              </div>
+              <div class="card-footer">
+                <button class="btn btn-hint" id="show-answer-btn" onclick="showAnswer()">显示答案</button>
+              </div>
+            </div>
+            
+            <div class="rating-buttons" id="rating-buttons" style="display: none;">
+              <button class="rating-btn rating-again" onclick="rateCard(1)">
+                <span class="rating-label">Again</span>
+                <span class="rating-interval" id="interval-1">1m</span>
+              </button>
+              <button class="rating-btn rating-hard" onclick="rateCard(2)">
+                <span class="rating-label">Hard</span>
+                <span class="rating-interval" id="interval-2">10m</span>
+              </button>
+              <button class="rating-btn rating-good" onclick="rateCard(3)">
+                <span class="rating-label">Good</span>
+                <span class="rating-interval" id="interval-3">1d</span>
+              </button>
+              <button class="rating-btn rating-easy" onclick="rateCard(4)">
+                <span class="rating-label">Easy</span>
+                <span class="rating-interval" id="interval-4">4d</span>
+              </button>
+              <button class="rating-btn rating-perfect" onclick="rateCard(5)">
+                <span class="rating-label">Perfect</span>
+                <span class="rating-interval" id="interval-5">10d</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Cards List View -->
+      <section id="cards-view" class="view">
+        <div class="view-header">
+          <h1>所有卡片</h1>
+          <div class="search-box">
+            <input type="text" id="card-search" placeholder="搜索卡片..." oninput="filterCards()">
+          </div>
+        </div>
+        
+        <div class="cards-list" id="cards-list">
+          <!-- Cards will be loaded here -->
+        </div>
+      </section>
+
+      <!-- Decks View -->
+      <section id="decks-view" class="view">
+        <div class="view-header">
+          <h1>牌组管理</h1>
+          <button class="btn btn-primary" onclick="showCreateDeckModal()">➕ 新建牌组</button>
+        </div>
+        
+        <div class="decks-grid" id="decks-grid">
+          <!-- Decks will be loaded here -->
+        </div>
+      </section>
+
+      <!-- Add Card View -->
+      <section id="add-view" class="view">
+        <div class="view-header">
+          <h1>添加卡片</h1>
+        </div>
+        
+        <div class="add-form">
+          <div class="form-group">
+            <label for="deck-select-add">选择牌组</label>
+            <select id="deck-select-add">
+              <!-- Options populated by JS -->
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="question-input">问题</label>
+            <textarea id="question-input" placeholder="输入问题..." rows="3"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label for="answer-input">答案</label>
+            <textarea id="answer-input" placeholder="输入答案..." rows="5"></textarea>
+          </div>
+          
+          <button class="btn btn-primary btn-large" onclick="addCard()">添加卡片</button>
+          
+          <div class="quick-add">
+            <h3>快速添加 (格式: 问题::答案)</h3>
+            <textarea id="quick-add-input" placeholder="每行一个卡片，格式: 问题::答案" rows="5"></textarea>
+            <button class="btn btn-secondary" onclick="quickAdd()">批量添加</button>
+          </div>
+        </div>
+      </section>
+      <!-- Import APKG View -->
+      <section id="import-view" class="view">
+        <div class="view-header">
+          <h1>导入 ANKI 卡包</h1>
+        </div>
+        
+        <div class="import-form">
+          <div class="import-description">
+            <p>📦 导入 .apkg 格式的 Anki 卡包文件</p>
+            <ul>
+              <li>支持所有标准 .apkg 文件</li>
+              <li>自动保留卡片内容和字段</li>
+              <li>可选择导入到指定牌组</li>
+            </ul>
+          </div>
+          
+          <div class="form-group">
+            <label for="import-deck-select">导入到牌组</label>
+            <select id="import-deck-select">
+              <option value="1">默认牌组</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="apkg-file" class="file-label">
+              <span class="file-icon">📁</span>
+              <span class="file-text">选择 .apkg 文件</span>
+            </label>
+            <input type="file" id="apkg-file" accept=".apkg" style="display: none;" onchange="onFileSelected()">
+            <div id="file-info" class="file-info" style="display: none;">
+              <span id="file-name"></span>
+              <span id="file-size"></span>
+            </div>
+          </div>
+          
+          <div id="preview-area" class="preview-area" style="display: none;">
+            <h3>📋 卡包预览</h3>
+            <div class="preview-stats">
+              <div class="preview-stat">
+                <span class="preview-stat-value" id="preview-cards">0</span>
+                <span class="preview-stat-label">卡片数</span>
+              </div>
+              <div class="preview-stat">
+                <span class="preview-stat-value" id="preview-decks">0</span>
+                <span class="preview-stat-label">牌组数</span>
+              </div>
+              <div class="preview-stat">
+                <span class="preview-stat-value" id="preview-models">0</span>
+                <span class="preview-stat-label">模型数</span>
+              </div>
+            </div>
+            <div id="preview-details" class="preview-details"></div>
+          </div>
+          
+          <button class="btn btn-primary btn-large" id="import-btn" onclick="importAPKG()" disabled>
+            📥 开始导入
+          </button>
+          
+          <div id="import-progress" class="import-progress" style="display: none;">
+            <div class="progress-bar">
+              <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <p id="progress-text">正在导入...</p>
+          </div>
+          
+          <div id="import-result" class="import-result" style="display: none;"></div>
+        </div>
+      </section>
+
+      <!-- Stats View -->
+      <section id="stats-view" class="view">
+        <div class="view-header">
+          <h1>学习统计</h1>
+        </div>
+        
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">📚</div>
+            <div class="stat-number" id="stat-total">0</div>
+            <div class="stat-title">总卡片数</div>
+          </div>
+          <div class="stat-card stat-due">
+            <div class="stat-icon">⏰</div>
+            <div class="stat-number" id="stat-due">0</div>
+            <div class="stat-title">待复习</div>
+          </div>
+          <div class="stat-card stat-done">
+            <div class="stat-icon">✅</div>
+            <div class="stat-number" id="stat-reviewed">0</div>
+            <div class="stat-title">已复习</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🆕</div>
+            <div class="stat-number" id="stat-new">0</div>
+            <div class="stat-title">新卡片</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📈</div>
+            <div class="stat-number" id="stat-learning">0</div>
+            <div class="stat-title">学习中</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-number" id="stat-ease">2.5</div>
+            <div class="stat-title">平均难度</div>
+          </div>
+        </div>
+        
+        <div class="stats-chart">
+          <h3>学习进度</h3>
+          <div class="progress-bar">
+            <div class="progress-segment" id="progress-new" style="background: #3498db; width: 0%"></div>
+            <div class="progress-segment" id="progress-learning" style="background: #f39c12; width: 0%"></div>
+            <div class="progress-segment" id="progress-review" style="background: #27ae60; width: 0%"></div>
+          </div>
+          <div class="progress-legend">
+            <span><span class="legend-dot" style="background: #3498db"></span> 新卡片</span>
+            <span><span class="legend-dot" style="background: #f39c12"></span> 学习</span>
+            <span><span class="legend-dot" style="background: #27ae60"></span> 复习</span>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal" id="delete-modal" style="display: none;">
+    <div class="modal-content">
+      <h3>确认删除</h3>
+      <p>确定要删除这张卡片吗？此操作无法撤销。</p>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+        <button class="btn btn-danger" id="confirm-delete-btn">删除</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Deck Modal -->
+  <div class="modal" id="deck-modal" style="display: none;">
+    <div class="modal-content">
+      <h3 id="deck-modal-title">新建牌组</h3>
+      <div class="form-group">
+        <label for="deck-name-input">牌组名称</label>
+        <input type="text" id="deck-name-input" placeholder="输入牌组名称...">
+      </div>
+      <div class="form-group">
+        <label for="deck-desc-input">描述（可选）</label>
+        <textarea id="deck-desc-input" placeholder="输入牌组描述..." rows="2"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeDeckModal()">取消</button>
+        <button class="btn btn-primary" id="save-deck-btn">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

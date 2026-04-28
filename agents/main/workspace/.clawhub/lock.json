@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "skills": {
+    "habit-tracker": {
+      "version": "1.0.0",
+      "installedAt": 1772046732273
+    },
+    "agent-team-orchestration": {
+      "version": "1.0.0",
+      "installedAt": 1772419695731
+    },
+    "openclaw-backup": {
+      "version": "1.0.0",
+      "installedAt": 1772541063009
+    },
+    "drawio": {
+      "version": "1.0.0",
+      "installedAt": 1772674927583
+    }
+  }
+}
